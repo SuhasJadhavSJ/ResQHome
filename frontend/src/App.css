@@ -1,0 +1,21 @@
+:root {
+  /* ===== Brand Colors ===== */
+  --color-primary: #2C7A7B;        /* Teal */
+  --color-primary-dark: #285E61;   /* Dark Teal */
+  --color-accent: #F6AD55;         /* Amber */
+  --color-accent-dark: #ED8936;    /* Deep Orange */
+
+  /* ===== Neutral Palette ===== */
+  --color-background: #F7FAFC;     /* Light Gray */
+  --color-surface: #FFFFFF;        /* White */
+  --color-border: #E2E8F0;         /* Soft Gray border */
+
+  /* ===== Text Colors ===== */
+  --color-text-primary: #1A202C;   /* Dark Gray (Headings) */
+  --color-text-secondary: #4A5568; /* Medium Gray (Paragraphs) */
+
+  /* ===== Status Colors ===== */
+  --color-success: #38A169;        /* Green */
+  --color-warning: #ECC94B;        /* Yellow */
+  --color-error: #E53E3E;          /* Red */
+}
