@@ -1,13 +1,47 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const navigate = useNavigate()
+
+  const handleLogin = async(e) => {
     e.preventDefault();
-    console.log("Login credentials:", { email, password });
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || "Login failed");
+      }
+
+      const data = await response.json();
+      console.log("✅ Login successful:", data);
+
+      // Optionally save token
+      localStorage.setItem("token", data.token);
+
+      // Redirect after login
+      navigate("/"); // change to your actual route
+    } catch (err) {
+      console.error("❌ Error logging in:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

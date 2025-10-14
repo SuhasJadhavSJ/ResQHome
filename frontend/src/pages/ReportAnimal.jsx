@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
+import { GoogleMap, Marker, Autocomplete } from "@react-google-maps/api";
+import { useGoogleMaps } from "../Hooks/useGoogleMaps"; // ✅ shared loader hook
 
 const containerStyle = {
   width: "100%",
@@ -9,34 +10,31 @@ const containerStyle = {
   boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
 };
 
-const ReportAnimalMap = ({ position, setPosition, autocompleteRef }) => {
-  return (
-    <GoogleMap
-      mapContainerStyle={containerStyle}
-      center={position || { lat: 20, lng: 77 }}
-      zoom={position ? 15 : 5}
-      onClick={(e) =>
-        setPosition({ lat: e.latLng.lat(), lng: e.latLng.lng() })
-      }
-      options={{
-        streetViewControl: false,
-        mapTypeControl: false,
-        fullscreenControl: false,
-      }}
-    >
-      {position && (
-        <Marker
-          position={position}
-          draggable={true}
-          onDragEnd={(e) =>
-            setPosition({ lat: e.latLng.lat(), lng: e.latLng.lng() })
-          }
-        />
-      )}
-      {autocompleteRef && <Autocomplete onLoad={(auto) => (autocompleteRef.current = auto)} />}
-    </GoogleMap>
-  );
-};
+const ReportAnimalMap = ({ position, setPosition }) => (
+  <GoogleMap
+    mapContainerStyle={containerStyle}
+    center={position || { lat: 20, lng: 77 }}
+    zoom={position ? 15 : 5}
+    onClick={(e) =>
+      setPosition({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+    }
+    options={{
+      streetViewControl: false,
+      mapTypeControl: false,
+      fullscreenControl: false,
+    }}
+  >
+    {position && (
+      <Marker
+        position={position}
+        draggable={true}
+        onDragEnd={(e) =>
+          setPosition({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+        }
+      />
+    )}
+  </GoogleMap>
+);
 
 const ReportAnimal = () => {
   const [formData, setFormData] = useState({
@@ -50,10 +48,7 @@ const ReportAnimal = () => {
   const [address, setAddress] = useState("");
   const autocompleteRef = useRef(null);
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: ["places"] // required for Autocomplete
-  });
+  const { isLoaded } = useGoogleMaps(); // ✅ use shared loader
 
   // Get current location for map option
   useEffect(() => {
@@ -76,6 +71,7 @@ const ReportAnimal = () => {
       if (place.geometry) {
         const { lat, lng } = place.geometry.location;
         setPosition({ lat: lat(), lng: lng() });
+        setAddress(place.formatted_address || place.name);
       }
     }
   };

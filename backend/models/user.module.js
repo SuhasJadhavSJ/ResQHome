@@ -16,6 +16,10 @@ const userModule = mongoose.Schema({
     role : {
         type : String,
         default : 'user'
+    },
+    city : {
+        type : String,
+        require : true
     }
 })
 

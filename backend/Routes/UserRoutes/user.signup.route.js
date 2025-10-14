@@ -6,10 +6,10 @@ const router = express.Router()
 
 router.post("/signup", async (req,res)=>{
     try {
-        const {name, email, password} = req.body;
+        const {name, email,city, password} = req.body;
         
         // 401 
-        if(!name || !email || !password) return res.status(401).json({error : "All field are required"})
+        if(!name || !email || !city || !password) return res.status(401).json({error : "All field are required"})
 
         // Find user if already present :
         const presentUser = await User.findOne({email})
@@ -20,7 +20,7 @@ router.post("/signup", async (req,res)=>{
         const hashPassword = await bcrypt.hash(password,salt)
 
         // save the user info : 
-        const user = new User({name, email,password : hashPassword})
+        const user = new User({name, city ,email,password : hashPassword})
         await user.save();
 
         // Create Token :

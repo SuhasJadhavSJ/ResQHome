@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -11,13 +10,51 @@ const Signup = () => {
     confirmPassword: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    console.log("Signup data:", formData);
+    setError("");
+    setLoading(true);
+
+    const { name, email, city, password, confirmPassword } = formData;
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, city }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || data.message || "Signup failed");
+      }
+
+      // Save token to localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      alert("Signup successful!");
+      navigate("/login");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -26,6 +63,8 @@ const Signup = () => {
         <h2 className="text-3xl font-bold text-teal-800 text-center mb-6">
           Create an Account
         </h2>
+        {error && <p className="text-red-600 text-center mb-4">{error}</p>}
+
         <form onSubmit={handleSignup} className="space-y-5">
           <div>
             <label className="block text-gray-700 font-medium mb-2">Full Name</label>
@@ -96,9 +135,10 @@ const Signup = () => {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg font-semibold transition"
           >
-            Sign Up
+            {loading ? "Signing Up..." : "Sign Up"}
           </button>
         </form>
 
@@ -114,4 +154,3 @@ const Signup = () => {
 };
 
 export default Signup;
-
