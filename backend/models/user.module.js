@@ -1,28 +1,40 @@
 import mongoose from "mongoose";
 
-const userModule = mongoose.Schema({
-    name : {
-        type : String,
-        require : true
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+      trim: true,
     },
-    email : {
-        type : String,
-        require : true
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
-    password : {
-        type : String,
-        require : true
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 6 characters long"],
     },
-    role : {
-        type : String,
-        default : 'user'
+    role: {
+      type: String,
+      enum: ["user", "corporation"],
+      default: "user",
     },
-    city : {
-        type : String,
-        require : true
-    }
-})
+    city: {
+      type: String,
+      required: [true, "City is required"],
+      trim: true,
+    },
+  },
+  {
+    timestamps: true, // adds createdAt and updatedAt
+  }
+);
 
-const User = mongoose.model("user",userModule)
+const User = mongoose.model("User", userSchema);
 
-export default User
+export default User;

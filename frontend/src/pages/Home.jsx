@@ -1,102 +1,157 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { FaPaw, FaHeart, FaMapMarkerAlt } from "react-icons/fa";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const Home = () => {
+  const images = [
+    "https://cdn.pixabay.com/photo/2016/02/19/11/53/dog-1209621_1280.jpg",
+    "https://cdn.pixabay.com/photo/2017/05/09/21/47/dog-2294701_1280.jpg",
+    "https://cdn.pixabay.com/photo/2015/03/26/09/54/cat-690051_1280.jpg",
+    "https://cdn.pixabay.com/photo/2016/03/27/18/10/dog-1284307_1280.jpg",
+    "https://cdn.pixabay.com/photo/2017/02/20/18/03/dog-2083492_1280.png",
+  ];
+
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 1000,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    fade: true,
+    arrows: false,
+  };
+
   return (
-    <div className="pt-20 bg-gray-50 text-gray-800">
+    <div className="pt-20 bg-gray-50 text-gray-800 overflow-hidden">
       {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-6 py-16">
+      <section className="relative max-w-7xl mx-auto px-6 py-16 flex flex-col-reverse md:flex-row items-center justify-between">
         {/* Left Content */}
-        <div className="md:w-1/2 space-y-6 text-center md:text-left">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-teal-800 leading-tight">
-            Give Every Pet a Second Home
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1 }}
+          className="md:w-1/2 space-y-6 text-center md:text-left z-10"
+        >
+          <h1 className="text-5xl md:text-6xl font-extrabold text-teal-800 leading-tight">
+            Give Every Pet a <span className="text-amber-500">Second Home</span>
           </h1>
-          <p className="text-lg text-gray-700">
-            ResQHome connects kind-hearted adopters with rescued animals.
-            Whether you want to adopt or report a stray in need — we make it simple,
-            local, and compassionate.
+          <p className="text-lg text-gray-700 leading-relaxed">
+            ResQHome connects kind-hearted adopters with rescued animals. Adopt, report, or volunteer — every action saves a life.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"
+          >
             <Link
               to="/adopt"
-              className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition"
+              className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105"
             >
               Adopt a Pet
             </Link>
             <Link
               to="/report"
-              className="border-2 border-amber-500 text-amber-600 hover:bg-amber-50 px-6 py-3 rounded-lg font-semibold transition"
+              className="border-2 border-amber-500 text-amber-600 hover:bg-amber-50 px-6 py-3 rounded-lg font-semibold transition-transform transform hover:scale-105"
             >
               Report an Animal
             </Link>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        {/* Right Image */}
-        <div className="md:w-1/2 mt-10 md:mt-0 flex justify-center">
-          <img
-            src="https://cdn.pixabay.com/photo/2017/02/20/18/03/dog-2083492_1280.png"
-            alt="Rescue Animals"
-            className="w-80 md:w-96 rounded-xl drop-shadow-lg"
-          />
-        </div>
+        {/* Right Image Carousel */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1 }}
+          className="md:w-1/2 mt-10 md:mt-0 relative"
+        >
+          <div className="rounded-2xl overflow-hidden shadow-xl">
+            <Slider {...sliderSettings}>
+              {images.map((src, index) => (
+                <div key={index}>
+                  <img
+                    src={src}
+                    alt={`Rescued animal ${index + 1}`}
+                    className="w-full h-[400px] object-cover"
+                  />
+                </div>
+              ))}
+            </Slider>
+          </div>
+        </motion.div>
       </section>
 
       {/* Features Section */}
-      <section className="bg-white py-16">
+      <section className="bg-white py-20">
         <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10 text-center">
-          <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition">
-            <FaPaw className="text-amber-500 text-4xl mx-auto mb-4" />
-            <h3 className="font-semibold text-xl mb-2 text-teal-800">Adopt Easily</h3>
-            <p className="text-gray-600">
-              Browse verified listings from NGOs and municipal shelters in your city.
-            </p>
-          </div>
-
-          <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition">
-            <FaMapMarkerAlt className="text-amber-500 text-4xl mx-auto mb-4" />
-            <h3 className="font-semibold text-xl mb-2 text-teal-800">
-              Report with Live Location
-            </h3>
-            <p className="text-gray-600">
-              Spot an injured or stray animal? Report it with real-time location so local
-              rescuers can help fast.
-            </p>
-          </div>
-
-          <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition">
-            <FaHeart className="text-amber-500 text-4xl mx-auto mb-4" />
-            <h3 className="font-semibold text-xl mb-2 text-teal-800">
-              Support the Cause
-            </h3>
-            <p className="text-gray-600">
-              Volunteer or contribute to local shelters making a difference every day.
-            </p>
-          </div>
+          {[
+            {
+              icon: <FaPaw />,
+              title: "Adopt Easily",
+              desc: "Browse verified listings from NGOs and municipal shelters in your city.",
+            },
+            {
+              icon: <FaMapMarkerAlt />,
+              title: "Report with Live Location",
+              desc: "Spot an injured or stray animal? Report it with real-time location so rescuers can act fast.",
+            },
+            {
+              icon: <FaHeart />,
+              title: "Support the Cause",
+              desc: "Volunteer or contribute to local shelters making a difference every day.",
+            },
+          ].map((feature, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.2 }}
+              className="p-8 bg-gray-50 rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2"
+            >
+              <div className="text-amber-500 text-5xl mb-4 flex justify-center">
+                {feature.icon}
+              </div>
+              <h3 className="font-bold text-2xl mb-3 text-teal-800">
+                {feature.title}
+              </h3>
+              <p className="text-gray-600">{feature.desc}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
 
       {/* Call-to-Action Section */}
-      <section className="bg-teal-800 text-white py-16 text-center px-6">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="bg-gradient-to-r from-teal-700 to-teal-900 text-white py-20 text-center px-6"
+      >
+        <h2 className="text-4xl md:text-5xl font-bold mb-6">
           Together, We Can Change Lives
         </h2>
-        <p className="text-lg mb-8 text-gray-200">
+        <p className="text-lg mb-10 text-gray-200 max-w-2xl mx-auto">
           Every rescue starts with one report. Be the reason a tail wags today.
         </p>
-        <Link
-          to="/report"
-          className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold transition"
-        >
-          Report an Animal Now
-        </Link>
-      </section>
+        <motion.div whileHover={{ scale: 1.05 }}>
+          <Link
+            to="/report"
+            className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-lg font-semibold shadow-lg transition"
+          >
+            Report an Animal Now
+          </Link>
+        </motion.div>
+      </motion.section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-6 text-center text-sm">
-        © {new Date().getFullYear()} ResQHome — Built with ❤️ to save lives.
+        © {new Date().getFullYear()} <span className="text-amber-500">ResQHome</span> — Built with ❤️ to save lives.
       </footer>
     </div>
   );

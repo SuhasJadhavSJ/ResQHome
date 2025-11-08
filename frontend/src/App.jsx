@@ -11,6 +11,9 @@ import PetDetails from "./pages/PetDetails.jsx";
 import MyAdoptions from "./pages/MyAdoption.jsx";
 import ReportAnimal from "./pages/ReportAnimal.jsx";
 import MyReports from "./pages/MyReport.jsx";
+import CorporationSignup from "./components/CorporationSignup.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
+import EditProfile from "./pages/EditProfile.jsx";
 const App = () => {
   return (
     <>
@@ -26,6 +29,9 @@ const App = () => {
             <Route path="/my-reports" element={<MyReports/>}/>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/corporation-signup" element={<CorporationSignup/>}/>
+            <Route path="/profile" element={<UserProfile/>}/>
+            <Route path="/edit-profile" element={<EditProfile />} />
           </Routes>
         </div>
       </BrowserRouter>

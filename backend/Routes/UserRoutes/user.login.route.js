@@ -1,11 +1,12 @@
-import express from 'express';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import User from '../../models/user.module.js';
+// routes/auth/login.js
+import express from "express";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import User from "../../models/user.module.js";
 
 const router = express.Router();
 
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -29,13 +30,13 @@ router.post('/login', async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      token: `Bearer ${token}`,
+      token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error("Login error:", error);

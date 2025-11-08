@@ -9,40 +9,47 @@ const Login = () => {
 
   const navigate = useNavigate()
 
-  const handleLogin = async(e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const response = await fetch("http://localhost:8000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const response = await fetch("http://localhost:8000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || "Login failed");
-      }
+    const data = await response.json();
 
-      const data = await response.json();
-      console.log("✅ Login successful:", data);
-
-      // Optionally save token
-      localStorage.setItem("token", data.token);
-
-      // Redirect after login
-      navigate("/"); // change to your actual route
-    } catch (err) {
-      console.error("❌ Error logging in:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed");
     }
-  };
+
+    // ✅ Save both token and user data
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    // ✅ Trigger navbar update instantly (no refresh needed)
+    window.dispatchEvent(new Event("storage"));
+
+    // ✅ Redirect based on role
+    if (data.user.role === "corporation") {
+      navigate("/corp/dashboard");
+    } else {
+      navigate("/");
+    }
+
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 px-6">

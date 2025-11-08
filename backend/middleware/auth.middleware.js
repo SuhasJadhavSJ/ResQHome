@@ -3,22 +3,27 @@ import jwt from "jsonwebtoken";
 function authMiddleware(req, res, next) {
   const authHeader = req.headers["authorization"];
 
-  if (!authHeader) return res.status(404).json({ error: "Token not found" });
+  if (!authHeader) {
+    return res.status(401).json({ error: "Authorization header missing" });
+  }
 
-  // Extract the token from the header :
-  const token = authHeader.split(" ")[1];
+  // ✅ Extract token (supports both 'Bearer token' and plain token)
+  const token = authHeader.startsWith("Bearer ")
+    ? authHeader.split(" ")[1]
+    : authHeader;
 
-  // verify the token;
-  jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
-    if (err) {
-      if (err.name === "TokenExpiredError")
-        return res.status(401).json({ error: "Token expired" });
-      return res.status(403).json({ error: "Invalid token" });
-    }
+  if (!token) {
+    return res.status(403).json({ error: "Token not provided" });
+  }
 
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
     req.user = decoded;
     next();
-  });
+  } catch (err) {
+    console.error("Token verification failed:", err);
+    return res.status(401).json({ error: "Invalid or expired token" });
+  }
 }
 
 export default authMiddleware;

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -11,47 +12,35 @@ const Signup = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
     const { name, email, city, password, confirmPassword } = formData;
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
+      toast.error("Passwords do not match!");
       return;
     }
 
+    setLoading(true);
     try {
       const res = await fetch("http://localhost:8000/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, city }),
+        body: JSON.stringify({ name, email, city, password, role: "user" }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
 
-      if (!res.ok) {
-        throw new Error(data.error || data.message || "Signup failed");
-      }
-
-      // Save token to localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      alert("Signup successful!");
+      toast.success("Signup successful! Please log in.");
       navigate("/login");
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -61,77 +50,33 @@ const Signup = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-50 px-6">
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
         <h2 className="text-3xl font-bold text-teal-800 text-center mb-6">
-          Create an Account
+          Create User Account
         </h2>
-        {error && <p className="text-red-600 text-center mb-4">{error}</p>}
-
         <form onSubmit={handleSignup} className="space-y-5">
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-600 outline-none"
-              placeholder="Enter your name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Email</label>
-            <input
-              type="email"
-              name="email"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-600 outline-none"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">City</label>
-            <input
-              type="text"
-              name="city"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-600 outline-none"
-              placeholder="Enter your city"
-              value={formData.city}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Password</label>
-            <input
-              type="password"
-              name="password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-600 outline-none"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-600 outline-none"
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          {["name", "email", "city", "password", "confirmPassword"].map(
+            (field) => (
+              <div key={field}>
+                <label className="block text-gray-700 font-medium mb-2 capitalize">
+                  {field === "confirmPassword"
+                    ? "Confirm Password"
+                    : field === "city"
+                    ? "City"
+                    : field}
+                </label>
+                <input
+                  type={
+                    field.includes("password") ? "password" : field === "email" ? "email" : "text"
+                  }
+                  name={field}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-600 outline-none"
+                  placeholder={`Enter your ${field}`}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            )
+          )}
 
           <button
             type="submit"
@@ -143,9 +88,9 @@ const Signup = () => {
         </form>
 
         <p className="text-center text-gray-600 mt-6">
-          Already have an account?{" "}
-          <Link to="/login" className="text-teal-700 font-semibold hover:underline">
-            Login
+          Registering as a corporation?{" "}
+          <Link to="/corporation-signup" className="text-teal-700 font-semibold hover:underline">
+            Click here
           </Link>
         </p>
       </div>
