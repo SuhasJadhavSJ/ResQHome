@@ -14,6 +14,8 @@ import MyReports from "./pages/MyReport.jsx";
 import CorporationSignup from "./components/CorporationSignup.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
+import ReportDetails from "./pages/ReportDetails.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
 const App = () => {
   return (
     <>
@@ -24,14 +26,22 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/adopt" element={<Adopt />} />
             <Route path="/pet/:id" element={<PetDetails />} />
-            <Route path="/my-adoptions" element={<MyAdoptions/>}/>
-            <Route path="/report" element={<ReportAnimal/>}/>
-            <Route path="/my-reports" element={<MyReports/>}/>
+            <Route path="/my-adoptions" element={<MyAdoptions />} />
+            <Route path="/report" element={<ReportAnimal />} />
+            <Route path="/my-reports" element={<MyReports />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/corporation-signup" element={<CorporationSignup/>}/>
-            <Route path="/profile" element={<UserProfile/>}/>
+            <Route path="/corporation-signup" element={<CorporationSignup />} />
+            <Route path="/profile" element={<UserProfile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
+            <Route
+              path="/report/:id"
+              element={
+                <RequireAuth>
+                  <ReportDetails />
+                </RequireAuth>
+              }
+            />
           </Routes>
         </div>
       </BrowserRouter>

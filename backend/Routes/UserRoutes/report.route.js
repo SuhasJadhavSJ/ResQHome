@@ -46,6 +46,7 @@ router.post(
       const fullImageUrl = `${req.protocol}://${req.get(
         "host"
       )}/uploads/reports/${req.file.filename}`;
+      console.log("✅ Image stored at:", fullImageUrl);
 
       const newReport = new Report({
         user: req.user.id,
@@ -87,5 +88,41 @@ router.get("/my-reports", authMiddleware, async (req, res) => {
       .json({ success: false, message: "Failed to fetch reports" });
   }
 });
+
+
+// ✅ GET /api/user/report/:id
+router.get("/report/:id", authMiddleware, async (req, res) => {
+  try {
+    const report = await Report.findById(req.params.id);
+    if (!report)
+      return res.status(404).json({ success: false, message: "Report not found" });
+
+    // ensure only owner can view
+    if (report.user.toString() !== req.user.id)
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+
+    res.status(200).json({ success: true, report });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching report" });
+  }
+});
+
+// ✅ DELETE /api/user/delete-report/:id
+router.delete("/delete-report/:id", authMiddleware, async (req, res) => {
+  try {
+    const report = await Report.findById(req.params.id);
+    if (!report)
+      return res.status(404).json({ success: false, message: "Report not found" });
+
+    if (report.user.toString() !== req.user.id)
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+
+    await report.deleteOne();
+    res.status(200).json({ success: true, message: "Report deleted" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error deleting report" });
+  }
+});
+
 
 export default router;

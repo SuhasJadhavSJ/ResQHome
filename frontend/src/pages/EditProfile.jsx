@@ -5,59 +5,111 @@ import { motion } from "framer-motion";
 
 const EditProfile = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState({
-    name: "",
-    city: "",
-    email: "",
-  });
-  const [image, setImage] = useState(null);
+  const [user, setUser] = useState({ name: "", city: "", email: "", profilePic: "" });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwords, setPasswords] = useState({
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
   });
 
+  // Fetch current profile
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      setUser(storedUser);
-    }
-  }, []);
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return navigate("/login");
 
-  const handleUserChange = (e) => {
+      try {
+        const res = await fetch("http://localhost:8000/api/user/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success) setUser(data.user);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    };
+    fetchProfile();
+  }, [navigate]);
+
+  // Handle input
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setUser({ ...user, [name]: value });
+    setUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswords({ ...passwords, [name]: value });
-  };
-
+  // Handle image selection
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (file) setImage(URL.createObjectURL(file));
-  };
-
-  const handleSaveChanges = (e) => {
-    e.preventDefault();
-    // Here you’ll call the backend PUT /update-profile endpoint
-    alert("✅ Profile updated successfully!");
-  };
-
-  const handlePasswordUpdate = (e) => {
-    e.preventDefault();
-    if (passwords.newPassword !== passwords.confirmNewPassword) {
-      alert("❌ New passwords do not match!");
-      return;
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
     }
-    // Backend API call for password update here
-    alert("🔑 Password updated successfully!");
   };
 
-  const handleForgotPassword = () => {
-    // Redirect or open email reset flow
-    alert("📧 Password reset link sent to your registered email!");
+  // ✅ Update profile (name, city, photo)
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Not authorized!");
+
+    const formData = new FormData();
+    formData.append("name", user.name);
+    formData.append("city", user.city);
+    if (imageFile) formData.append("profilePic", imageFile);
+
+    try {
+      const res = await fetch("http://localhost:8000/api/user/update-profile", {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert("✅ Profile updated!");
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/profile");
+      } else {
+        alert(data.message || "Error updating profile");
+      }
+    } catch (error) {
+      console.error("Profile update failed:", error);
+      alert("❌ Something went wrong.");
+    }
+  };
+
+  // ✅ Update password
+  const handlePasswordUpdate = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Not authorized!");
+    if (passwords.newPassword !== passwords.confirmNewPassword)
+      return alert("Passwords do not match");
+
+    try {
+      const res = await fetch("http://localhost:8000/api/user/update-password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(passwords),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("🔑 Password updated successfully!");
+        setPasswords({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+        setShowPasswordForm(false);
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.error("Password update error:", err);
+    }
   };
 
   return (
@@ -72,7 +124,7 @@ const EditProfile = () => {
             onClick={() => navigate("/profile")}
             className="flex items-center gap-2 text-sm text-gray-600 hover:text-amber-500 transition"
           >
-            <FaHome /> Back to Profile
+            <FaHome /> Back
           </button>
         </div>
 
@@ -80,7 +132,8 @@ const EditProfile = () => {
         <div className="flex flex-col items-center mb-8">
           <motion.img
             src={
-              image ||
+              imagePreview ||
+              user.profilePic ||
               "https://cdn-icons-png.flaticon.com/512/3177/3177440.png"
             }
             alt="Profile"
@@ -102,41 +155,33 @@ const EditProfile = () => {
           </label>
         </div>
 
-        {/* Edit Profile Form */}
-        <form onSubmit={handleSaveChanges} className="space-y-6">
+        {/* Update Profile */}
+        <form onSubmit={handleProfileUpdate} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">
-                Full Name
-              </label>
+              <label className="block text-gray-700 mb-2 font-medium">Full Name</label>
               <input
                 type="text"
                 name="name"
                 value={user.name}
-                onChange={handleUserChange}
+                onChange={handleChange}
                 className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400"
-                placeholder="Enter your full name"
               />
             </div>
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">
-                City
-              </label>
+              <label className="block text-gray-700 mb-2 font-medium">City</label>
               <input
                 type="text"
                 name="city"
                 value={user.city}
-                onChange={handleUserChange}
+                onChange={handleChange}
                 className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400"
-                placeholder="Enter your city"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">
-              Email (read-only)
-            </label>
+            <label className="block text-gray-700 mb-2 font-medium">Email</label>
             <input
               type="email"
               value={user.email}
@@ -153,52 +198,54 @@ const EditProfile = () => {
           </button>
         </form>
 
-        {/* Change Password Section */}
+        {/* Password Section */}
         <div className="mt-10 border-t border-gray-200 pt-6">
-          <h3 className="text-2xl font-semibold text-teal-800 mb-4 flex items-center gap-2">
-            <FaLock /> Change Password
-          </h3>
-          <form onSubmit={handlePasswordUpdate} className="space-y-4">
-            <input
-              type="password"
-              name="currentPassword"
-              value={passwords.currentPassword}
-              onChange={handlePasswordChange}
-              placeholder="Current Password"
-              className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400"
-            />
-            <input
-              type="password"
-              name="newPassword"
-              value={passwords.newPassword}
-              onChange={handlePasswordChange}
-              placeholder="New Password"
-              className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400"
-            />
-            <input
-              type="password"
-              name="confirmNewPassword"
-              value={passwords.confirmNewPassword}
-              onChange={handlePasswordChange}
-              placeholder="Confirm New Password"
-              className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400"
-            />
-            <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-semibold text-teal-800 flex items-center gap-2">
+              <FaLock /> Security Settings
+            </h3>
+            <button
+              onClick={() => setShowPasswordForm((prev) => !prev)}
+              className="text-sm text-amber-500 hover:underline font-semibold"
+            >
+              {showPasswordForm ? "Hide Password Section" : "Update Password"}
+            </button>
+          </div>
+
+          {showPasswordForm && (
+            <form onSubmit={handlePasswordUpdate} className="space-y-4 mt-5">
+              <input
+                type="password"
+                name="currentPassword"
+                value={passwords.currentPassword}
+                onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+                placeholder="Current Password"
+                className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400"
+              />
+              <input
+                type="password"
+                name="newPassword"
+                value={passwords.newPassword}
+                onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                placeholder="New Password"
+                className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400"
+              />
+              <input
+                type="password"
+                name="confirmNewPassword"
+                value={passwords.confirmNewPassword}
+                onChange={(e) => setPasswords({ ...passwords, confirmNewPassword: e.target.value })}
+                placeholder="Confirm New Password"
+                className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400"
+              />
               <button
                 type="submit"
                 className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-lg font-semibold transition"
               >
                 Update Password
               </button>
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="text-sm text-teal-600 hover:underline"
-              >
-                Forgot Password?
-              </button>
-            </div>
-          </form>
+            </form>
+          )}
         </div>
       </div>
     </div>
