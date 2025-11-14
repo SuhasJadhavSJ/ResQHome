@@ -16,12 +16,24 @@ import UserProfile from "./pages/UserProfile.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
 import ReportDetails from "./pages/ReportDetails.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Rescued from "./pages/Rescued.jsx";
+import RescuedDetails from "./pages/RescuedDetails.jsx";
+import Tips from "./pages/Tips.jsx";
+import About from "./pages/About.jsx";
+import CorpDashboard from "./pages/Corp/CorpDashboard.jsx";
+import CorpReportDetails from "./pages/Corp/CorpReports.jsx";
+import CorpReports from "./pages/Corp/CorpReports.jsx";
+import CorpRescued from "./pages/Corp/CorpRescued.jsx";
+import CorpRescuedDetails from "./pages/Corp/CorpRescuedDetails.jsx";
 const App = () => {
   return (
     <>
       <BrowserRouter>
         <Navbar />
         <div className="pt-20">
+          <ToastContainer position="top-right" autoClose={2500} />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/adopt" element={<Adopt />} />
@@ -34,6 +46,10 @@ const App = () => {
             <Route path="/corporation-signup" element={<CorporationSignup />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/rescued" element={<Rescued />} />
+            <Route path="/rescued/:id" element={<RescuedDetails />} />
+            <Route path="/tips" element={<Tips />} />
+            <Route path="/about" element={<About />} />
             <Route
               path="/report/:id"
               element={
@@ -42,6 +58,13 @@ const App = () => {
                 </RequireAuth>
               }
             />
+            {/* Corps Side ROutes */}
+            <Route path="/corp/dashboard" element={<CorpDashboard />} />
+            <Route path="/corp/reports/:id" element={<CorpReportDetails />} />
+            <Route path="/corp/reports" element={<CorpReports />} />
+            <Route path="/corp/rescued" element={<CorpRescued />} />
+<Route path="/corp/rescued/:id" element={<CorpRescuedDetails />} />
+
           </Routes>
         </div>
       </BrowserRouter>

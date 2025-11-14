@@ -11,7 +11,10 @@ import logoutRoute from "./Routes/UserRoutes/user.logout.route.js";
 import userProfile from "./Routes/UserRoutes/user.profile.route.js";
 import userAdoptionRoute from "./Routes/UserRoutes/user.adoption.route.js";
 import reportRoute from "./Routes/UserRoutes/report.route.js";
-
+import rescuedRoute from './Routes/UserRoutes/rescued.route.js'
+import corpRoute from './Routes/CorpRoutes/corp.route.js'
+import corpReports from "./Routes/CorpRoutes/corp.reports.route.js"
+import corpRescuedRoute from './Routes/CorpRoutes/corp.rescued.route.js'
 dotenv.config();
 
 const app = express();
@@ -47,6 +50,12 @@ app.use("/api/auth", logoutRoute);
 app.use("/api/user", userProfile);
 app.use("/api/user", userAdoptionRoute);
 app.use("/api/user", reportRoute);
+app.use("/api/rescued", rescuedRoute);
+
+// Corp Routes :
+app.use("/api/corp", corpRoute);
+app.use("/api/corp",corpReports);
+app.use("/api/corp", corpRescuedRoute);
 
 // Server start
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

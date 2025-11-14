@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import UserNavbar from "./UserNavbar";
 import CorpNavbar from "./CorpNavbar";
+import CorpSidebar from "./CorporationComponents/CorpSidebar";
 
 const Navbar = () => {
   const [role, setRole] = useState(null);

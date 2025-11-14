@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GoogleMap, Marker, Autocomplete } from "@react-google-maps/api";
 import { useGoogleMaps } from "../Hooks/useGoogleMaps";
-import { FaMapMarkerAlt, FaLocationArrow, FaTimes } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaLocationArrow,
+  FaTimes,
+} from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const containerStyle = {
   width: "100%",
@@ -11,6 +16,7 @@ const containerStyle = {
   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
 };
 
+// ===================== Map Component =====================
 const ReportAnimalMap = ({ position, setPosition, onAddressUpdate }) => {
   useEffect(() => {
     if (position && window.google) {
@@ -50,6 +56,7 @@ const ReportAnimalMap = ({ position, setPosition, onAddressUpdate }) => {
   );
 };
 
+// ===================== Main Component =====================
 const ReportAnimal = () => {
   const { isLoaded } = useGoogleMaps();
   const autocompleteRef = useRef(null);
@@ -60,39 +67,58 @@ const ReportAnimal = () => {
     city: "",
     photo: null,
   });
+
   const [photoPreview, setPhotoPreview] = useState(null);
   const [position, setPosition] = useState(null);
   const [address, setAddress] = useState("");
   const [showMap, setShowMap] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Handle Input
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
     if (name === "photo" && files[0]) {
       setFormData({ ...formData, photo: files[0] });
       setPhotoPreview(URL.createObjectURL(files[0]));
+      toast.info("Preview updated!");
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
+  // Autocomplete Select
   const handlePlaceSelect = () => {
     const place = autocompleteRef.current.getPlace();
     if (place?.geometry) {
-      const { lat, lng } = place.geometry.location;
-      const coords = { lat: lat(), lng: lng() };
+      const coords = {
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      };
       setPosition(coords);
       setAddress(place.formatted_address || place.name);
       setShowMap(true);
+      toast.success("Location selected!");
     }
   };
 
+  // Current Location
   const useCurrentLocation = () => {
-    if (!navigator.geolocation) return alert("Geolocation not supported.");
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported!");
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const coords = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        };
+
         setPosition(coords);
+        toast.info("Location detected!");
+
         if (window.google) {
           const geocoder = new window.google.maps.Geocoder();
           geocoder.geocode({ location: coords }, (results, status) => {
@@ -101,9 +127,10 @@ const ReportAnimal = () => {
             }
           });
         }
+
         setShowMap(true);
       },
-      () => alert("Unable to fetch location.")
+      () => toast.error("Unable to fetch your location")
     );
   };
 
@@ -111,13 +138,30 @@ const ReportAnimal = () => {
     if (isLoaded) useCurrentLocation();
   }, [isLoaded]);
 
+  // Submit Report
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!position) return alert("Select or detect location first!");
-    if (!formData.photo) return alert("Please upload an image");
+
+    if (!formData.type || !formData.city || !formData.description) {
+      toast.error("Please fill all required fields!");
+      return;
+    }
+
+    if (!position) {
+      toast.error("Select or detect the location!");
+      return;
+    }
+
+    if (!formData.photo) {
+      toast.error("Please upload an image!");
+      return;
+    }
 
     const token = localStorage.getItem("token");
-    if (!token) return alert("Login required!");
+    if (!token) {
+      toast.error("Login required!");
+      return;
+    }
 
     setLoading(true);
 
@@ -137,19 +181,21 @@ const ReportAnimal = () => {
       });
 
       const data = await res.json();
+
       if (data.success) {
-        alert("🐾 Report submitted successfully!");
+        toast.success("Report submitted successfully!");
+
         setFormData({ type: "", description: "", city: "", photo: null });
         setPhotoPreview(null);
         setAddress("");
         setPosition(null);
         setShowMap(false);
       } else {
-        alert(data.message || "Error submitting report");
+        toast.error(data.message || "Error submitting report");
       }
     } catch (err) {
+      toast.error("Something went wrong!");
       console.error(err);
-      alert("Error submitting report");
     } finally {
       setLoading(false);
     }
@@ -167,6 +213,7 @@ const ReportAnimal = () => {
         onSubmit={handleSubmit}
         className="space-y-6 bg-white p-8 rounded-2xl shadow-xl border border-gray-100"
       >
+        {/* Inputs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
@@ -174,8 +221,8 @@ const ReportAnimal = () => {
             placeholder="Animal Type (Dog, Cat, etc.)"
             value={formData.type}
             onChange={handleChange}
-            required
             className="w-full border p-3 rounded-md focus:ring-2 focus:ring-teal-400"
+            required
           />
           <input
             type="text"
@@ -183,8 +230,8 @@ const ReportAnimal = () => {
             placeholder="City"
             value={formData.city}
             onChange={handleChange}
-            required
             className="w-full border p-3 rounded-md focus:ring-2 focus:ring-teal-400"
+            required
           />
         </div>
 
@@ -193,18 +240,13 @@ const ReportAnimal = () => {
           placeholder="Describe the animal’s condition..."
           value={formData.description}
           onChange={handleChange}
-          required
           className="w-full border p-3 rounded-md focus:ring-2 focus:ring-teal-400"
+          required
         />
 
+        {/* Photo Upload */}
         <div className="relative">
-          <input
-            type="file"
-            name="photo"
-            accept="image/*"
-            onChange={handleChange}
-            className="w-full"
-          />
+          <input type="file" name="photo" accept="image/*" onChange={handleChange} />
           {photoPreview && (
             <div className="mt-3 relative w-40">
               <img
@@ -217,6 +259,7 @@ const ReportAnimal = () => {
                 onClick={() => {
                   setPhotoPreview(null);
                   setFormData({ ...formData, photo: null });
+                  toast.info("Image removed");
                 }}
                 className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
               >
@@ -226,6 +269,7 @@ const ReportAnimal = () => {
           )}
         </div>
 
+        {/* Search Bar */}
         <Autocomplete
           onLoad={(auto) => (autocompleteRef.current = auto)}
           onPlaceChanged={handlePlaceSelect}
@@ -239,6 +283,7 @@ const ReportAnimal = () => {
           />
         </Autocomplete>
 
+        {/* Buttons */}
         <div className="flex flex-wrap gap-4 mt-4 justify-center">
           <button
             type="button"
@@ -247,6 +292,7 @@ const ReportAnimal = () => {
           >
             <FaLocationArrow /> Use Current Location
           </button>
+
           <button
             type="button"
             onClick={() => setShowMap(!showMap)}
@@ -256,6 +302,7 @@ const ReportAnimal = () => {
           </button>
         </div>
 
+        {/* Map */}
         {showMap && (
           <div className="mt-6">
             <ReportAnimalMap
@@ -266,6 +313,7 @@ const ReportAnimal = () => {
           </div>
         )}
 
+        {/* Submit */}
         <button
           type="submit"
           disabled={loading}

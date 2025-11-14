@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaPaw, FaHeart, FaMapMarkerAlt } from "react-icons/fa";
@@ -7,13 +7,37 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 const Home = () => {
-  const images = [
+  const [rescuedImages, setRescuedImages] = useState([]);
+
+  useEffect(() => {
+    const fetchRescued = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/user/rescued");
+        const data = await res.json();
+
+        if (data.success) {
+          const imgs = data.data
+            .map((r) => r.imageUrl)
+            .filter((url) => url !== null && url !== undefined);
+
+          setRescuedImages(imgs);
+        }
+      } catch (err) {
+        console.error("Failed to load rescued animals:", err);
+      }
+    };
+
+    fetchRescued();
+  }, []);
+
+  const fallbackImages = [
     "https://cdn.pixabay.com/photo/2016/02/19/11/53/dog-1209621_1280.jpg",
     "https://cdn.pixabay.com/photo/2017/05/09/21/47/dog-2294701_1280.jpg",
     "https://cdn.pixabay.com/photo/2015/03/26/09/54/cat-690051_1280.jpg",
-    "https://cdn.pixabay.com/photo/2016/03/27/18/10/dog-1284307_1280.jpg",
-    "https://cdn.pixabay.com/photo/2017/02/20/18/03/dog-2083492_1280.png",
   ];
+
+  const sliderImages =
+    rescuedImages.length > 0 ? rescuedImages : fallbackImages;
 
   const sliderSettings = {
     dots: true,
@@ -29,6 +53,7 @@ const Home = () => {
     <div className="pt-20 bg-gray-50 text-gray-800 overflow-hidden">
       {/* Hero Section */}
       <section className="relative max-w-7xl mx-auto px-6 py-16 flex flex-col-reverse md:flex-row items-center justify-between">
+        
         {/* Left Content */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
@@ -40,7 +65,8 @@ const Home = () => {
             Give Every Pet a <span className="text-amber-500">Second Home</span>
           </h1>
           <p className="text-lg text-gray-700 leading-relaxed">
-            ResQHome connects kind-hearted adopters with rescued animals. Adopt, report, or volunteer — every action saves a life.
+            ResQHome connects kind-hearted adopters with rescued animals.
+            Adopt, report, or volunteer — every action saves a life.
           </p>
 
           <motion.div
@@ -73,11 +99,11 @@ const Home = () => {
         >
           <div className="rounded-2xl overflow-hidden shadow-xl">
             <Slider {...sliderSettings}>
-              {images.map((src, index) => (
+              {sliderImages.map((src, index) => (
                 <div key={index}>
                   <img
                     src={src}
-                    alt={`Rescued animal ${index + 1}`}
+                    alt={`Rescued ${index + 1}`}
                     className="w-full h-[400px] object-cover"
                   />
                 </div>
@@ -94,39 +120,39 @@ const Home = () => {
             {
               icon: <FaPaw />,
               title: "Adopt Easily",
-              desc: "Browse verified listings from NGOs and municipal shelters in your city.",
+              desc: "Browse verified listings from NGOs and municipal shelters.",
             },
             {
               icon: <FaMapMarkerAlt />,
-              title: "Report with Live Location",
-              desc: "Spot an injured or stray animal? Report it with real-time location so rescuers can act fast.",
+              title: "Report with Location",
+              desc: "Report injured or stray animals with live GPS location.",
             },
             {
               icon: <FaHeart />,
               title: "Support the Cause",
-              desc: "Volunteer or contribute to local shelters making a difference every day.",
+              desc: "Volunteer or contribute to local shelters making a difference.",
             },
-          ].map((feature, i) => (
+          ].map((f, idx) => (
             <motion.div
-              key={i}
+              key={idx}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.2 }}
-              className="p-8 bg-gray-50 rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2"
+              transition={{ delay: idx * 0.2 }}
+              className="p-8 bg-gray-50 rounded-xl shadow-lg hover:shadow-2xl transition hover:-translate-y-2"
             >
               <div className="text-amber-500 text-5xl mb-4 flex justify-center">
-                {feature.icon}
+                {f.icon}
               </div>
               <h3 className="font-bold text-2xl mb-3 text-teal-800">
-                {feature.title}
+                {f.title}
               </h3>
-              <p className="text-gray-600">{feature.desc}</p>
+              <p className="text-gray-600">{f.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Call-to-Action Section */}
+      {/* CTA */}
       <motion.section
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -139,19 +165,19 @@ const Home = () => {
         <p className="text-lg mb-10 text-gray-200 max-w-2xl mx-auto">
           Every rescue starts with one report. Be the reason a tail wags today.
         </p>
-        <motion.div whileHover={{ scale: 1.05 }}>
-          <Link
-            to="/report"
-            className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-lg font-semibold shadow-lg transition"
-          >
-            Report an Animal Now
-          </Link>
-        </motion.div>
+        <Link
+          to="/report"
+          className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-lg font-semibold shadow-lg transition-transform hover:scale-105"
+        >
+          Report an Animal Now
+        </Link>
       </motion.section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-6 text-center text-sm">
-        © {new Date().getFullYear()} <span className="text-amber-500">ResQHome</span> — Built with ❤️ to save lives.
+        © {new Date().getFullYear()}{" "}
+        <span className="text-amber-500">ResQHome</span> — Built with ❤️ to
+        save lives.
       </footer>
     </div>
   );

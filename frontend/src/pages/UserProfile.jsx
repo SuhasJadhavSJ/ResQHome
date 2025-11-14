@@ -108,7 +108,7 @@ const Profile = () => {
               </h2>
               <button
                 onClick={() => navigate("/edit-profile")}
-                className="border border-gray-300 text-gray-800 font-semibold px-4 py-1 rounded-md hover:bg-gray-100 transition"
+                className="border border-gray-300 text-gray-800 font-semibold px-4 py-1 rounded-md hover:bg-gray-100 transition cursor-pointer"
               >
                 Edit Profile
               </button>
@@ -126,7 +126,7 @@ const Profile = () => {
       <div className="mt-8 w-full max-w-4xl flex justify-center gap-8 border-t border-gray-300">
         <button
           onClick={() => setActiveTab("reports")}
-          className={`py-3 px-6 font-semibold text-sm tracking-wide border-b-2 transition ${
+          className={`cursor-pointer py-3 px-6 font-semibold text-sm tracking-wide border-b-2 transition ${
             activeTab === "reports"
               ? "border-teal-600 text-teal-700"
               : "border-transparent text-gray-500 hover:text-gray-800"
@@ -136,7 +136,7 @@ const Profile = () => {
         </button>
         <button
           onClick={() => setActiveTab("adoptions")}
-          className={`py-3 px-6 font-semibold text-sm tracking-wide border-b-2 transition ${
+          className={`cursor-pointer py-3 px-6 font-semibold text-sm tracking-wide border-b-2 transition ${
             activeTab === "adoptions"
               ? "border-teal-600 text-teal-700"
               : "border-transparent text-gray-500 hover:text-gray-800"
@@ -166,7 +166,7 @@ const Profile = () => {
                 reports.map((report) => (
                   <div
                     key={report._id}
-                    className="relative group rounded-xl overflow-hidden bg-white shadow hover:shadow-xl transition duration-300"
+                    className="relative group rounded-xl overflow-hidden bg-white shadow hover:shadow-xl transition duration-300 cursor-pointer"
                   >
                     <img
                       src={

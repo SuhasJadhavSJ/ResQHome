@@ -19,7 +19,19 @@ const CorporationSignup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
     const { corporationName, email, city, password, confirmPassword } = formData;
+
+    // Required fields
+    if (!corporationName || !email || !city || !password || !confirmPassword) {
+      toast.error("All fields are required!");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long!");
+      return;
+    }
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
@@ -41,12 +53,13 @@ const CorporationSignup = () => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) throw new Error(data.message || "Signup failed");
 
-      toast.success("Corporation signup successful!");
-      navigate("/login");
+      toast.success("Corporation registered successfully! Redirecting...");
+
+      setTimeout(() => navigate("/login"), 1200);
     } catch (err) {
-      toast.error(err.message || "Signup failed");
+      toast.error(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -58,7 +71,9 @@ const CorporationSignup = () => {
         <h2 className="text-3xl font-bold text-teal-800 text-center mb-6">
           Corporation Registration
         </h2>
+
         <form onSubmit={handleSignup} className="space-y-5">
+          {/* Corporation Name */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
               Corporation Name
@@ -74,14 +89,20 @@ const CorporationSignup = () => {
             />
           </div>
 
+          {/* Other Fields */}
           {["email", "city", "password", "confirmPassword"].map((field) => (
             <div key={field}>
               <label className="block text-gray-700 font-medium mb-2 capitalize">
                 {field === "confirmPassword" ? "Confirm Password" : field}
               </label>
+
               <input
                 type={
-                  field.includes("password") ? "password" : field === "email" ? "email" : "text"
+                  field.includes("password")
+                    ? "password"
+                    : field === "email"
+                    ? "email"
+                    : "text"
                 }
                 name={field}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-600 outline-none"
@@ -93,6 +114,7 @@ const CorporationSignup = () => {
             </div>
           ))}
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -104,7 +126,10 @@ const CorporationSignup = () => {
 
         <p className="text-center text-gray-600 mt-6">
           Already registered?{" "}
-          <Link to="/login" className="text-teal-700 font-semibold hover:underline">
+          <Link
+            to="/login"
+            className="text-teal-700 font-semibold hover:underline"
+          >
             Login
           </Link>
         </p>

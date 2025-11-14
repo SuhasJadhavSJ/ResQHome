@@ -1,55 +1,63 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const response = await fetch("http://localhost:8000/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      if (!email || !password) {
+        toast.error("Please fill all fields!");
+        return;
+      }
 
-    const data = await response.json();
+      const response = await fetch("http://localhost:8000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!response.ok) {
-      throw new Error(data.message || "Login failed");
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Invalid email or password");
+        throw new Error(data.message || "Login failed");
+      }
+
+      // Save token + user
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Trigger navbar update
+      window.dispatchEvent(new Event("storage"));
+
+      toast.success("Login successful!");
+
+      setTimeout(() => {
+        if (data.user.role === "corporation") {
+          navigate("/corp/dashboard");
+        } else {
+          navigate("/");
+        }
+      }, 800);
+
+    } catch (err) {
+      toast.error("Login failed! Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-
-    // ✅ Save both token and user data
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    // ✅ Trigger navbar update instantly (no refresh needed)
-    window.dispatchEvent(new Event("storage"));
-
-    // ✅ Redirect based on role
-    if (data.user.role === "corporation") {
-      navigate("/corp/dashboard");
-    } else {
-      navigate("/");
-    }
-
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 px-6">
@@ -57,6 +65,7 @@ const handleLogin = async (e) => {
         <h2 className="text-3xl font-bold text-teal-800 text-center mb-6">
           Welcome Back
         </h2>
+
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label className="block text-gray-700 font-medium mb-2">Email</label>
@@ -83,10 +92,13 @@ const handleLogin = async (e) => {
           </div>
 
           <button
+            disabled={loading}
             type="submit"
-            className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg font-semibold transition"
+            className={`w-full ${
+              loading ? "bg-gray-400" : "bg-amber-500 hover:bg-amber-600"
+            } text-white py-2 rounded-lg font-semibold transition`}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
@@ -102,4 +114,3 @@ const handleLogin = async (e) => {
 };
 
 export default Login;
-
