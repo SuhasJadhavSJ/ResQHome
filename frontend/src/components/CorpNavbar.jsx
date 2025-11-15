@@ -22,17 +22,19 @@ const CorpNavbar = () => {
     navigate("/login");
   };
 
-  const menu = [
-    { name: "Dashboard", icon: <FaHome />, path: "/corp/dashboard" },
-    { name: "Reported Animals", icon: <FaExclamationTriangle />, path: "/corp/reports" },
-    { name: "Rescued Animals", icon: <FaDog />, path: "/corp/rescued" },
-    // NEW: create listing (upload rescued animal details + images)
-    { name: "List for Adoption", icon: <FaPlusCircle />, path: "/corp/rescued/new" },
-    // NEW: view/manage adoption listings
-    { name: "Adoption Listings", icon: <FaListUl />, path: "/corp/adoptions" },
-    { name: "Adoption Requests", icon: <FaUsers />, path: "/corp/adoption-requests" },
-    { name: "Settings", icon: <FaCog />, path: "/corp/settings" },
-  ];
+const menu = [
+  { name: "Dashboard", icon: <FaHome />, path: "/corp/dashboard" },
+  { name: "Reported Animals", icon: <FaExclamationTriangle />, path: "/corp/reports" },
+  { name: "Rescued Animals", icon: <FaDog />, path: "/corp/rescued" },
+
+  // FIXED THIS LINE:
+  { name: "List for Adoption", icon: <FaPlusCircle />, path: "/corp/adoption/add" },
+
+  { name: "Adoption Listings", icon: <FaListUl />, path: "/corp/adoptions" },
+  { name: "Adoption Requests", icon: <FaUsers />, path: "/corp/adoption-requests" },
+  { name: "Settings", icon: <FaCog />, path: "/corp/settings" },
+];
+
 
   return (
     <aside

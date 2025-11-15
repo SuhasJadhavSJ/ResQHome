@@ -23,11 +23,11 @@ const CorpNavbar = () => {
   };
 
   const menu = [
-    { name: "Dashboard", icon: <FaHome />, path: "/corp/dashboard" },
+    { name: "Dashboarddd", icon: <FaHome />, path: "/corp/dashboard" },
     { name: "Reported Animals", icon: <FaExclamationTriangle />, path: "/corp/reports" },
     { name: "Rescued Animals", icon: <FaDog />, path: "/corp/rescued" },
     // NEW: create listing (upload rescued animal details + images)
-    { name: "List for Adoption", icon: <FaPlusCircle />, path: "/corp/rescued/new" },
+    { name: "List for Adoption", icon: <FaPlusCircle />, path: "/corp/adoption/add" },
     // NEW: view/manage adoption listings
     { name: "Adoption Listings", icon: <FaListUl />, path: "/corp/adoptions" },
     { name: "Adoption Requests", icon: <FaUsers />, path: "/corp/adoption-requests" },

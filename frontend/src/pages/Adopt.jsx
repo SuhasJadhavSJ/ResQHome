@@ -23,20 +23,27 @@ const Adopt = () => {
   const [showModal, setShowModal] = useState(false);
 
   // ✅ Fetch pets from backend
-  useEffect(() => {
-    const fetchPets = async () => {
-      try {
-        const res = await fetch("http://localhost:8000/api/animals");
-        const data = await res.json();
-        setPets(data.animals || []);
-      } catch (error) {
-        console.error("Error fetching pets:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPets();
-  }, []);
+useEffect(() => {
+  const fetchPets = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch("http://localhost:8000/api/corp/adoptions", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+
+      setPets(data.data || []);
+    } catch (error) {
+      console.error("Error fetching pets:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchPets();
+}, []);
+
 
   const toggleReports = (id) => {
     setShowReports((prev) => ({ ...prev, [id]: !prev[id] }));
