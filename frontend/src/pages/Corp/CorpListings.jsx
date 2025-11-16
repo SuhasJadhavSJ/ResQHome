@@ -1,12 +1,18 @@
+// frontend/pages/Corp/CorpListings.jsx
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../../components/common/Pagination"; // ensure correct import path
 
 const CorpListings = () => {
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   const fetchListings = async () => {
     try {
@@ -62,69 +68,93 @@ const CorpListings = () => {
   };
 
   if (loading)
-    return <div className="pt-24 text-center text-gray-600">Loading...</div>;
+    return <p className="text-center text-gray-600 text-lg pt-10 animate-pulse">Loading...</p>;
+
+  // Pagination logic
+  const totalPages = Math.ceil(animals.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedAnimals = animals.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="pt-20 ml-24 px-6">
-      <h1 className="text-3xl font-bold text-teal-900 mb-8">Adoption Listings</h1>
+    <section className="ml-[90px] min-h-screen bg-gray-50 py-6 pr-6">
+      <div className="max-w-[1650px] w-full">
 
-      {animals.length === 0 ? (
-        <p className="text-gray-500">No animals listed for adoption yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {animals.map((animal) => (
-            <div
-              key={animal._id}
-              className="bg-white shadow-lg border rounded-xl overflow-hidden"
-            >
-              <img
-                src={animal.images?.[0]}
-                alt={animal.name}
-                className="h-56 w-full object-cover"
-              />
+        <h1 className="text-3xl font-extrabold text-teal-900 tracking-wide mb-7 pl-4">
+          Adoption Listings
+        </h1>
 
-              <div className="p-5 space-y-2">
-                <h2 className="text-xl font-semibold text-teal-800">
-                  {animal.name}
-                </h2>
+        {animals.length === 0 ? (
+          <p className="text-gray-500 text-lg pl-4">No animals listed yet.</p>
+        ) : (
+          <>
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 pl-4">
 
-                <p className="text-gray-600">
-                  {animal.type} • {animal.breed}
-                </p>
-                <p className="text-gray-600">
-                  {animal.age} yrs • {animal.gender}
-                </p>
+              {paginatedAnimals.map((animal, index) => (
+                <div
+                  key={animal._id}
+                  className="bg-white shadow-xl border border-gray-200 rounded-xl overflow-hidden transition hover:shadow-2xl hover:-translate-y-1"
+                >
+                  <img
+                    src={animal.images?.[0]}
+                    alt={animal.name}
+                    className="h-60 w-full object-cover"
+                  />
 
-                <p className="text-sm text-gray-500">{animal.city}</p>
+                  <div className="p-5 space-y-2">
+                    <h2 className="text-xl font-bold text-teal-900">
+                      {animal.name}
+                    </h2>
 
-                <div className="flex justify-between mt-4">
-                  <button
-                    onClick={() => navigate(`/corp/adoption/${animal._id}`)}
-                    className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-                  >
-                    <FaEye /> View
-                  </button>
+                    <p className="text-gray-700 text-sm font-semibold">
+                      {animal.type} • {animal.breed || "—"}
+                    </p>
 
-                  <button
-                    onClick={() => navigate(`/corp/adoption/${animal._id}/edit`)}
-                    className="flex items-center gap-2 px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 text-sm"
-                  >
-                    <FaEdit /> Edit
-                  </button>
+                    <p className="text-gray-600 text-sm">
+                      {animal.age} yrs • {animal.gender}
+                    </p>
 
-                  <button
-                    onClick={() => deleteListing(animal._id)}
-                    className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
-                  >
-                    <FaTrash /> Delete
-                  </button>
+                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                      📍 {animal.city}
+                    </p>
+
+                    <div className="flex justify-between pt-4">
+                      <button
+                        onClick={() => navigate(`/corp/adoption/${animal._id}`)}
+                        className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs"
+                      >
+                        <FaEye /> View
+                      </button>
+
+                      <button
+                        onClick={() => navigate(`/corp/adoption/${animal._id}/edit`)}
+                        className="flex items-center gap-2 px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 text-xs"
+                      >
+                        <FaEdit /> Edit
+                      </button>
+
+                      <button
+                        onClick={() => deleteListing(animal._id)}
+                        className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xs"
+                      >
+                        <FaTrash /> Delete
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
+
             </div>
-          ))}
-        </div>
-      )}
-    </div>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
+      </div>
+    </section>
   );
 };
 

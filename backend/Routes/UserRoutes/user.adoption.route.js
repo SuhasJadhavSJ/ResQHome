@@ -17,7 +17,7 @@ router.get("/my-adoptions", authMiddleware, async (req, res) => {
       .sort({ createdAt: -1 });
 
     const underProcess = allAdoptions.filter((a) => a.status === "pending");
-    const approved = allAdoptions.filter((a) => a.status === "approved");
+    const approved = allAdoptions.filter((a) => a.status === "adopted");
     const rejected = allAdoptions.filter((a) => a.status === "rejected");
 
     return res.json({

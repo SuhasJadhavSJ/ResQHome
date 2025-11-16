@@ -14,71 +14,114 @@ const Rescued = () => {
         const res = await fetch("http://localhost:8000/api/rescued?page=1&limit=18");
         const data = await res.json();
         if (res.ok && data.success) setItems(data.data || []);
-        else console.error(data.message || "Failed to fetch");
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchRescued();
   }, []);
 
   return (
-    <div className="pt-24 pb-16 bg-gradient-to-b from-teal-50 to-white min-h-screen">
+    <div className="pt-24 pb-20 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-6">
-        <h1 className="text-4xl font-extrabold text-center text-teal-800 mb-8">
-          Rescued Animals
-        </h1>
 
-        {loading ? (
-          <p className="text-center text-teal-700">Loading rescued animals…</p>
-        ) : items.length === 0 ? (
-          <p className="text-center text-gray-600">No rescued animals found.</p>
-        ) : (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((it) => (
+        {/* Header */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center text-4xl md:text-5xl font-extrabold text-teal-800"
+        >
+          Rescued Animals
+        </motion.h1>
+
+        <p className="text-center text-gray-600 mt-1 mb-10">
+          These animals have been safely rescued and cared for 🐾
+        </p>
+
+        {/* Loading */}
+        {loading && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="animate-pulse h-72 bg-gray-200 rounded-xl shadow"
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Empty */}
+        {!loading && items.length === 0 && (
+          <p className="text-center text-gray-600 mt-10">
+            No rescued animals found at the moment.
+          </p>
+        )}
+
+        {/* Rescued Animal Cards */}
+        {!loading && items.length > 0 && (
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+
+            {items.map((it, idx) => (
               <motion.div
                 key={it._id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: idx * 0.06 }}
+                className="bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden 
+                          transition-all group hover:-translate-y-2 border border-gray-100"
               >
-                <div className="relative h-56 overflow-hidden">
+                {/* Image */}
+                <div className="relative h-60 overflow-hidden">
                   <img
                     src={it.imageUrl}
                     alt={it.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
-                  <div className="absolute top-3 left-3 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                    {it.status?.toUpperCase() || "AVAILABLE"}
-                  </div>
+
+                  {/* Status Badge */}
+                  <span
+                    className="absolute top-3 left-3 bg-amber-500 shadow text-white text-[11px] 
+                               font-semibold px-3 py-1 rounded-full tracking-wide"
+                  >
+                    {it.status?.toUpperCase() ?? "RESCUED"}
+                  </span>
                 </div>
 
-                <div className="p-4">
-                  <h3 className="text-xl font-semibold text-teal-800">{it.name}</h3>
-                  <p className="text-sm text-gray-600">{it.type} • {it.age}</p>
-                  <p className="text-sm text-gray-600 flex items-center gap-2 mt-2">
-                    <FaMapMarkerAlt className="text-amber-500" /> {it.city}
+                {/* Info */}
+                <div className="p-5">
+                  <h3 className="text-xl font-bold text-teal-800">{it.name}</h3>
+                  <p className="text-gray-700 text-sm mt-1 capitalize">
+                    {it.type} {it.age && `• ${it.age}`}
                   </p>
 
-                  <div className="mt-4 flex items-center justify-between">
+                  <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
+                    <FaMapMarkerAlt className="text-amber-500" size={13} /> {it.city}
+                  </p>
+
+                  {/* Buttons & Time */}
+                  <div className="flex items-center justify-between mt-6">
                     <Link
                       to={`/rescued/${it._id}`}
-                      className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg font-semibold"
+                      className="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 
+                                 text-white px-4 py-[9px] rounded-lg text-sm font-medium shadow"
                     >
-                      <FaPaw /> View
+                      <FaPaw size={14} /> View
                     </Link>
 
-                    <span className="text-sm text-gray-500">
-                      Rescued {new Date(it.rescuedAt).toLocaleDateString()}
+                    <span className="text-[11px] font-medium text-gray-500">
+                      {new Date(it.rescuedAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
+
               </motion.div>
             ))}
           </div>
         )}
+
       </div>
     </div>
   );

@@ -1,148 +1,235 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { FaPaw, FaMapMarkerAlt, FaVenusMars, FaNotesMedical, FaVideo } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
+import { 
+  FaMapMarkerAlt, FaNotesMedical, FaVideo, FaShieldAlt 
+} from "react-icons/fa";
 
-const fallbackImg = "https://via.placeholder.com/600x400?text=No+Image+Available";
+const fallbackImg =
+  "https://via.placeholder.com/600x400?text=No+Image+Available";
+
+// Pre-defined personality tags
+const presetTags = [
+  "Friendly",
+  "Calm",
+  "Playful",
+  "Kid-Safe",
+  "Vaccinated",
+  "Trained",
+  "Social",
+  "Special-Care"
+];
 
 const AnimalDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [animal, setAnimal] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
-    const fetchAnimal = async () => {
+    const load = async () => {
       try {
-        const token = localStorage.getItem("token");
         const res = await fetch(`http://localhost:8000/api/corp/adoption/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: localStorage.getItem("token") }
         });
-
         const data = await res.json();
-        setAnimal(data.data || null);
-        setActiveImage(data.data?.images?.[0] || null);
+        setAnimal(data.data);
+        setActiveImage(data.data?.images?.[0]);
       } catch (err) {
-        console.log(err);
+        toast.error("Something went wrong");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchAnimal();
+    load();
   }, [id]);
 
-  if (loading) return <div className="pt-24 text-center text-xl font-semibold">Loading...</div>;
-  if (!animal) return <div className="pt-24 text-center text-xl text-red-600">Animal not found</div>;
+  const requestAdoption = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/user/adopt/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: localStorage.getItem("token") }
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Adoption request submitted!");
+        navigate("/profile");
+      } else toast.error(data.message || "Failed");
+    } catch {
+      toast.error("Something went wrong");
+    }
+    setOpenModal(false);
+  };
+
+  if (loading) return <p className="pt-24 text-center">Loading...</p>;
+  if (!animal) return <p className="pt-24 text-center text-red-600">Not Found</p>;
 
   return (
-    <div className="pt-24 px-6 max-w-6xl mx-auto mb-10">
-      <h1 className="text-4xl font-bold text-teal-800 mb-6">{animal.name} 🐾</h1>
+    <div className="pt-24 pb-16 max-w-7xl mx-auto px-6">
 
-      {/* IMAGE + GALLERY */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      {/* HERO SECTION */}
+      <div className="grid lg:grid-cols-2 gap-8">
         
-        {/* Main Display Image */}
-        <div className="flex-1">
-          <img
-            src={activeImage || fallbackImg}
-            alt="animal"
-            className="w-full h-96 object-cover rounded-2xl shadow"
-          />
-        </div>
+        {/* Main Image */}
+        <motion.img
+          key={activeImage}
+          initial={{ opacity: 0.3, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          src={activeImage || fallbackImg}
+          className="rounded-3xl shadow-xl w-full h-[420px] object-cover"
+        />
 
-        {/* Thumbnail Images */}
-        <div className="lg:w-40 flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto">
+        {/* Thumbnail column */}
+        <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto">
           {animal.images?.map((img, i) => (
             <img
               key={i}
-              src={img}
               onClick={() => setActiveImage(img)}
-              className={`w-20 h-20 object-cover rounded-lg border-2 cursor-pointer ${
-                activeImage === img ? "border-teal-600" : "border-transparent"
-              }`}
-              alt="thumbnail"
+              src={img}
+              className={`w-24 h-24 rounded-xl object-cover cursor-pointer border-2
+              ${img === activeImage ? "border-teal-600" : "border-transparent"}`}
             />
           ))}
         </div>
       </div>
 
-      {/* DETAILS SECTION */}
-      <div className="mt-8 grid md:grid-cols-2 gap-6 text-lg text-gray-700">
-        <p><b className="text-teal-700">Type:</b> {animal.type}</p>
-        <p><b className="text-teal-700">Breed:</b> {animal.breed || "Unknown"}</p>
-        <p><b className="text-teal-700">Gender:</b> {animal.gender}</p>
-        <p><b className="text-teal-700">Age:</b> {animal.age}</p>
-        <p><b className="text-teal-700">Weight:</b> {animal.weight}</p>
-        <p><b className="text-teal-700">Color:</b> {animal.color}</p>
-        <p className="flex items-center gap-2">
-          <FaMapMarkerAlt className="text-teal-700" />
-          <b className="text-teal-700">Location:</b> {animal.address}, {animal.city}
-        </p>
+      {/* TITLE */}
+      <motion.h1
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-8 text-4xl font-extrabold text-teal-800 flex items-center gap-2"
+      >
+        {animal.name}
+      </motion.h1>
+
+      {/* LOCATION */}
+      <p className="flex items-center gap-2 text-gray-600 mt-1">
+        <FaMapMarkerAlt className="text-amber-500" />
+        {animal.address}, {animal.city}
+      </p>
+
+      {/* INFO GRID */}
+      <div className="mt-6 grid md:grid-cols-2 gap-6">
+        {[
+          ["Type", animal.type],
+          ["Breed", animal.breed || "Unknown"],
+          ["Gender", animal.gender],
+          ["Age", animal.age],
+          ["Weight", animal.weight],
+          ["Color", animal.color]
+        ].map(([label, val], i) => (
+          <div key={i} className="bg-white/60 backdrop-blur-xl rounded-xl p-4 shadow border">
+            <p className="text-gray-500 text-sm">{label}</p>
+            <p className="font-semibold text-teal-700">{val}</p>
+          </div>
+        ))}
       </div>
 
-      {/* DESCRIPTION */}
+      {/* PERSONALITY */}
       <div className="mt-8">
-        <h2 className="text-2xl font-semibold text-teal-800 mb-2">About</h2>
-        <p className="text-gray-700 leading-relaxed">{animal.description || "No description provided."}</p>
+        <h2 className="text-xl font-semibold text-teal-800 mb-2">Personality</h2>
+        <div className="flex flex-wrap gap-2">
+          {presetTags.map((tag) => (
+            <span
+              key={tag}
+              className="px-3 py-1 rounded-full text-xs bg-teal-100 text-teal-700 font-medium border border-teal-200"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ABOUT */}
+      <div className="mt-8">
+        <h2 className="flex items-center gap-2 text-xl font-semibold text-teal-800">
+          About
+        </h2>
+        <p className="mt-2 text-gray-700 leading-relaxed bg-white/60 p-4 rounded-xl shadow">
+          {animal.description || "No description provided."}
+        </p>
       </div>
 
       {/* MEDICAL HISTORY */}
       <div className="mt-8">
-        <h2 className="text-2xl font-semibold text-teal-800 mb-3 flex gap-2 items-center">
-          <FaNotesMedical /> Medical History
+        <h2 className="flex items-center gap-2 text-xl font-semibold text-teal-800">
+          <FaNotesMedical /> Medical Records
         </h2>
-        {animal.medicalHistory?.length > 0 ? (
-          <ul className="list-disc pl-6 space-y-1">
-            {animal.medicalHistory.map((entry, i) => (
-              <li key={i}>
-                <b>{new Date(entry.date).toLocaleDateString()}:</b> {entry.note}
+
+        {animal.medicalHistory?.length ? (
+          <ul className="mt-3 space-y-2">
+            {animal.medicalHistory.map((m, i) => (
+              <li key={i} className="bg-white/60 rounded-xl p-3 shadow text-gray-700">
+                <b>{new Date(m.date).toLocaleDateString()}:</b> {m.note}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-gray-500">No medical notes available.</p>
+          <p className="text-gray-500 mt-1">No medical info available.</p>
         )}
       </div>
-
-      {/* MEDICAL IMAGES */}
-      {animal.medicalImages?.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold text-teal-800 mb-3">Medical Documents</h2>
-          <div className="flex gap-3 flex-wrap">
-            {animal.medicalImages.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                alt="med report"
-                className="h-32 w-32 object-cover rounded-lg shadow cursor-pointer"
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* VIDEO */}
       {animal.video && (
         <div className="mt-10">
-          <h2 className="text-2xl font-semibold text-teal-800 mb-3 flex gap-2 items-center">
-            <FaVideo /> Video Preview
+          <h2 className="flex items-center gap-2 text-xl font-semibold text-teal-800">
+            <FaVideo /> Rescue / Behaviour Video
           </h2>
-          <video controls className="w-full h-80 rounded-lg shadow">
+          <video controls className="w-full h-80 rounded-2xl shadow mt-3">
             <source src={animal.video} />
           </video>
         </div>
       )}
 
-      {/* ADOPT BUTTON */}
-      <div className="mt-10 text-center">
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg text-xl"
-        >
-          Adopt Now ❤️
-        </motion.button>
-      </div>
+      {/* CTA */}
+      <motion.button
+        onClick={() => setOpenModal(true)}
+        whileTap={{ scale: 0.95 }}
+        className="mt-10 bg-amber-500 hover:bg-amber-600 text-white text-lg font-semibold px-8 py-3 rounded-xl shadow-lg block mx-auto"
+      >
+        Adopt Now ❤️
+      </motion.button>
+
+      {/* MODAL */}
+      <AnimatePresence>
+        {openModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.7, opacity: 0 }}
+              className="bg-white p-7 rounded-2xl shadow-xl max-w-md text-center"
+            >
+              <h2 className="text-xl font-bold text-teal-700">Confirm Adoption?</h2>
+              <p className="mt-2 text-gray-600">
+                You are requesting to adopt <b>{animal.name}</b>.
+              </p>
+              <div className="flex justify-center gap-4 mt-6">
+                <button
+                  onClick={() => setOpenModal(false)}
+                  className="px-5 py-2 bg-gray-200 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={requestAdoption}
+                  className="px-5 py-2 bg-amber-600 text-white rounded-lg"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

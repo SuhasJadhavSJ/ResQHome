@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaPaw, FaFileMedical, FaHeart } from "react-icons/fa";
+import { FaHeart, FaPaw, FaMapMarkerAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -30,7 +30,7 @@ const Adopt = () => {
         const adoptData = await adoptionsRes.json();
 
         setPets(petsData.data || []);
-        setAdoptions(adoptData.data?.pending || []); // only pending matters here
+        setAdoptions(adoptData.data?.pending || []);
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
@@ -45,9 +45,10 @@ const Adopt = () => {
     adoptions.some((a) => a.animal?._id === animalId);
 
   const handleAdoptClick = (pet) => {
-    if (userRequested(pet._id)) return;
-    setSelectedPet(pet);
-    setShowModal(true);
+    if (!userRequested(pet._id)) {
+      setSelectedPet(pet);
+      setShowModal(true);
+    }
   };
 
   const confirmAdoption = async () => {
@@ -58,17 +59,14 @@ const Adopt = () => {
         `http://localhost:8000/api/user/adopt/${selectedPet._id}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token
-          }
+          headers: { "Content-Type": "application/json", Authorization: token }
         }
       );
 
       const data = await res.json();
 
       if (data.success) {
-        alert("Request submitted. Visit your profile to track progress.");
+        alert("Request submitted successfully!");
         setAdoptions((prev) => [...prev, { animal: selectedPet, status: "pending" }]);
       } else {
         alert(data.message);
@@ -80,66 +78,90 @@ const Adopt = () => {
   };
 
   return (
-    <div className="pt-20 min-h-screen bg-gradient-to-br from-teal-50 to-amber-50">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-amber-50 pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-6">
+        
+        {/* Hero Section */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center text-4xl md:text-5xl font-extrabold text-teal-800 drop-shadow-sm"
+        >
+          Adopt a Friend, Change a Life 🐾
+        </motion.h1>
+        <p className="text-center text-gray-600 mt-2">
+          Choose from rescued animals waiting for a loving home.
+        </p>
 
-        <h1 className="text-center text-4xl font-bold text-teal-800">
-          Meet Your Future Friend 🐾
-        </h1>
 
-        {loading ? (
-          <p className="text-center p-6">Loading...</p>
-        ) : pets.length === 0 ? (
-          <p className="text-center text-gray-500">No pets available.</p>
+        {/* Loading View */}
+        {loading && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="animate-pulse rounded-xl bg-gray-200 h-80"></div>
+            ))}
+          </div>
+        )}
+
+        {/* No Data */}
+        {!loading && pets.length === 0 ? (
+          <p className="text-center text-gray-500 mt-12">No pets available.</p>
         ) : (
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 mt-10">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 mt-12">
             {pets.map((pet, i) => {
               const isRequested = userRequested(pet._id);
 
               return (
                 <motion.div
                   key={pet._id}
-                  initial={{ opacity: 0, y: 40 }}
+                  initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden border"
+                  transition={{ duration: 0.4, delay: i * 0.07 }}
+                  whileHover={{ translateY: -6 }}
+                  className="relative bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 group"
                 >
                   <img
                     src={pet.images?.[0] || fallbackImg}
-                    className="w-full h-64 object-cover"
+                    className="w-full h-64 object-cover transition-transform group-hover:scale-105"
                     alt={pet.name}
                   />
 
-                  <div className="p-6">
+                  <div className="p-5 space-y-1">
                     <h2 className="text-xl font-bold text-teal-800">{pet.name}</h2>
-                    <p><b>Type:</b> {pet.type}</p>
-                    <p><b>Age:</b> {pet.age}</p>
-                    <p><b>City:</b> {pet.city}</p>
 
-                    <div className="flex justify-between mt-5">
-                      
+                    <p className="text-gray-700 text-sm">
+                      {pet.type} • {pet.age} yrs
+                    </p>
+
+                    <p className="text-gray-500 text-sm flex items-center gap-2">
+                      <FaMapMarkerAlt className="text-amber-500" size={14} /> {pet.city}
+                    </p>
+
+                    <div className="flex justify-between items-center pt-3">
                       <Link
                         to={`/adoption/${pet._id}`}
-                        className="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded text-white"
+                        className="px-4 py-2 rounded-lg text-white text-sm bg-amber-500 hover:bg-amber-600 transition"
                       >
-                        <FaPaw />
+                        <FaPaw /> View
                       </Link>
 
                       <button
                         disabled={isRequested}
                         onClick={() => handleAdoptClick(pet)}
-                        className={`px-4 py-2 rounded text-white flex gap-2 items-center ${
-                          isRequested
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-teal-600 hover:bg-teal-700"
-                        }`}
+                        className={`px-4 py-2 rounded-lg text-white text-sm flex items-center gap-2 shadow
+                        ${isRequested ? "bg-gray-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"}`}
                       >
-                        <FaHeart />
+                        <FaHeart size={14} />
                         {isRequested ? "Requested" : "Adopt"}
                       </button>
-
                     </div>
                   </div>
+
+                  {isRequested && (
+                    <span className="absolute top-3 right-3 bg-teal-600 text-white text-xs px-3 py-1 rounded-full shadow-md">
+                      Pending
+                    </span>
+                  )}
                 </motion.div>
               );
             })}
@@ -147,18 +169,43 @@ const Adopt = () => {
         )}
       </div>
 
+      {/* Adoption Confirmation Modal */}
       <AnimatePresence>
         {showModal && selectedPet && (
-          <motion.div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-xl">
-              <h2 className="text-xl font-bold mb-4 text-teal-700">
-                Confirm adoption request?
+          <motion.div
+            className="fixed inset-0 bg-black/40 flex justify-center items-center backdrop-blur-sm z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <motion.div
+              initial={{ scale: 0.7 }}
+              animate={{ scale: 1 }}
+              className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-[90%] text-center"
+            >
+              <h2 className="text-2xl font-bold text-teal-700">
+                Confirm Your Adoption Request?
               </h2>
-              <div className="flex gap-4 justify-center">
-                <button className="bg-gray-300 px-4 py-2 rounded" onClick={() => setShowModal(false)}>Cancel</button>
-                <button className="bg-amber-600 text-white px-4 py-2 rounded" onClick={confirmAdoption}>Confirm</button>
+
+              <p className="mt-4 text-gray-600">
+                You’re adopting <b className="text-teal-700">{selectedPet.name}</b>.  
+                Please ensure you can provide proper care, safety, and love.
+              </p>
+
+              <div className="flex justify-between mt-8">
+                <button
+                  className="bg-gray-300 text-gray-700 px-5 py-2 rounded-lg"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="bg-amber-600 text-white px-5 py-2 rounded-lg hover:bg-amber-700"
+                  onClick={confirmAdoption}
+                >
+                  Confirm
+                </button>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

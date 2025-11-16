@@ -1,155 +1,153 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FaPaw, FaUsers, FaHandHoldingHeart, FaShieldAlt } from "react-icons/fa";
+import {
+  FaPaw,
+  FaUsers,
+  FaHandHoldingHeart,
+  FaShieldAlt,
+} from "react-icons/fa";
 
 const About = () => {
   return (
-    <div className="pt-24 pb-16 bg-gradient-to-b from-teal-50 to-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-6">
-        
-        {/* Header */}
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
+    <div className="relative pt-24 pb-20 min-h-screen bg-white overflow-hidden">
+
+      {/* Floating Paw Background */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.08 }}
+        transition={{ duration: 1 }}
+        className="absolute inset-0 bg-[url('https://i.ibb.co/N7crGJL/paw-bg.png')] bg-contain bg-repeat pointer-events-none"
+      />
+
+      <div className="relative max-w-7xl mx-auto px-6">
+
+        {/* HERO */}
+        <motion.div
+          initial={{ opacity: 0, y: -25 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-4xl font-extrabold text-center text-teal-800 mb-6"
+          transition={{ duration: 0.7 }}
+          className="text-center space-y-4"
         >
-          About ResQHome 🐾
-        </motion.h1>
+          <h1 className="text-5xl font-extrabold text-teal-800 drop-shadow-sm">
+            About ResQHome 🐾
+          </h1>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-center text-gray-700 max-w-3xl mx-auto mb-12 leading-relaxed"
-        >
-          ResQHome is a community-first initiative built to rescue, protect, and
-          provide safe homes for stray and abandoned animals.  
-          Our mission is simple — *connect caring humans with animals who need
-          them the most*, while empowering local corporations and rescuers with the right tools.
-        </motion.p>
+          <p className="text-gray-700 text-lg max-w-3xl mx-auto leading-relaxed">
+            A compassion-driven platform connecting rescuers, corporations, and loving
+            adopters — ensuring <span className="font-semibold">no animal suffers unseen.</span>
+          </p>
+        </motion.div>
 
-        {/* Mission Section */}
-        <div className="grid md:grid-cols-2 gap-10 items-center mt-16">
-          
-          {/* Image / Illustration */}
+        {/* Wavy Divider */}
+        <div className="mt-10">
+          <svg className="w-full" viewBox="0 0 1440 80" fill="none">
+            <path fill="#F0FDFA" d="M0,0 C480,120 960,-40 1440,60 L1440,0 L0,0 Z"></path>
+          </svg>
+        </div>
+
+        {/* MISSION */}
+        <section className="bg-teal-50/80 backdrop-blur-lg rounded-3xl p-10 shadow-xl border border-teal-100 mt-4 grid md:grid-cols-2 gap-10 items-center">
           <motion.img
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.92 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7 }}
             src="https://img.freepik.com/premium-vector/dog-cat-helping-hand-animal-rescue-logo-design_675567-1145.jpg"
-            alt="Rescue Animals"
-            className="w-full rounded-2xl shadow-lg object-cover"
+            alt="mission"
+            className="rounded-2xl shadow-xl w-full object-cover"
           />
 
-          {/* Text */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7 }}
           >
-            <h2 className="text-3xl font-bold text-teal-800 mb-4">
-              Our Mission
-            </h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              Every year, thousands of animals suffer due to neglect,
-              accidents, illness, or homelessness. We aim to change this
-              through:
+            <h2 className="text-3xl font-bold text-teal-800 mb-3">Our Mission</h2>
+            <p className="text-gray-700 leading-relaxed">
+              We exist to eliminate animal abandonment, suffering and homelessness by enabling:
             </p>
 
-            <ul className="space-y-3 text-gray-700">
-              <li className="flex gap-3 items-start">
-                <FaPaw className="text-amber-500 mt-1" />
-                Quick and easy reporting of animals in distress.
-              </li>
-              <li className="flex gap-3 items-start">
-                <FaHandHoldingHeart className="text-amber-500 mt-1" />
-                Verified adoption processes for safe and loving homes.
-              </li>
-              <li className="flex gap-3 items-start">
-                <FaShieldAlt className="text-amber-500 mt-1" />
-                Ensuring animal safety with collaborating corporations.
-              </li>
-              <li className="flex gap-3 items-start">
-                <FaUsers className="text-amber-500 mt-1" />
-                Building a strong community of rescuers and caregivers.
-              </li>
+            <ul className="mt-4 space-y-3 text-gray-700 font-medium">
+              {[
+                "Instant distress reporting & geo-based rescue",
+                "Verified, transparent adoption journey",
+                "Corporation-assisted medical & shelter support",
+                "Community-powered love, care & awareness",
+              ].map((point, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <FaPaw className="text-amber-500 mt-1" />
+                  {point}
+                </li>
+              ))}
             </ul>
           </motion.div>
-        </div>
+        </section>
 
-        {/* Vision Section */}
-        <div className="mt-20 grid md:grid-cols-2 gap-10 items-center">
+        {/* VISION */}
+        <section className="mt-24 grid md:grid-cols-2 gap-10 items-center">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7 }}
+            className="bg-white/70 backdrop-blur-lg p-8 rounded-3xl shadow-lg border border-gray-100"
           >
-            <h2 className="text-3xl font-bold text-teal-800 mb-4">
-              Our Vision
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              We envision a world where no animal is left unattended or unloved.
-              A world where technology bridges the gap between helpless animals
-              and the humans willing to help.
+            <h2 className="text-3xl font-bold text-teal-800 mb-4">Our Vision</h2>
+            <p className="text-gray-700 leading-relaxed text-lg">
+              A future where <span className="font-semibold text-teal-900">every injured,
+              abandoned or helpless animal finds safety</span> through<strong> technology-driven
+              rescue</strong>, compassionate humans, and responsible adoption — globally.
             </p>
           </motion.div>
 
+          {/* Updated Image */}
           <motion.img
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            src="https://img.freepik.com/premium-vector/cat-dog-logo-icon-adoption-pet-shop-veterinary_616222-4426.jpg"
-            alt="Vision"
-            className="w-full rounded-2xl shadow-lg object-cover"
-          />
-        </div>
+  initial={{ opacity: 0, scale: 0.92 }}
+  whileInView={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.7 }}
+  src="https://images.unsplash.com/photo-1507146426996-ef05306b995a?q=80&w=1200&auto=format&fit=crop"
+  alt="vision-img"
+  className="rounded-2xl shadow-xl w-full h-full object-cover"
+/>
 
-        {/* Values Section */}
-        <section className="mt-24">
-          <h2 className="text-3xl font-bold text-center text-teal-800 mb-10">
-            What We Stand For
-          </h2>
+        </section>
+
+        {/* CORE VALUES */}
+        <section className="mt-24 text-center">
+          <h2 className="text-3xl font-bold text-teal-800 mb-8">Our Core Values</h2>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              {
-                title: "Compassion",
-                desc: "Every life matters. We treat every animal with love and empathy.",
-                icon: <FaHandHoldingHeart className="text-4xl text-teal-700" />,
-              },
-              {
-                title: "Community",
-                desc: "We unite rescuers, corporations, and caregivers under one mission.",
-                icon: <FaUsers className="text-4xl text-teal-700" />,
-              },
-              {
-                title: "Trust",
-                desc: "Verified adoptions and rescue operations ensure safety.",
-                icon: <FaShieldAlt className="text-4xl text-teal-700" />,
-              },
-              {
-                title: "Action",
-                desc: "Fast reporting & quick response to save lives in critical moments.",
-                icon: <FaPaw className="text-4xl text-teal-700" />,
-              },
-            ].map((val, i) => (
+              { title: "Compassion", desc: "Every soul deserves care.", icon: <FaHandHoldingHeart /> },
+              { title: "Community", desc: "United for voiceless lives.", icon: <FaUsers /> },
+              { title: "Trust", desc: "Verified care & operations.", icon: <FaShieldAlt /> },
+              { title: "Action", desc: "Immediate help & rescue.", icon: <FaPaw /> },
+            ].map((item, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 25 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white rounded-xl p-6 shadow-md border border-gray-100 text-center hover:shadow-xl transition"
+                transition={{ delay: i * 0.08 }}
+                whileHover={{ scale: 1.08 }}
+                className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl cursor-pointer"
               >
-                <div className="flex justify-center mb-3">{val.icon}</div>
-                <h3 className="text-xl font-semibold text-teal-700 mb-2">
-                  {val.title}
-                </h3>
-                <p className="text-gray-600 text-sm">{val.desc}</p>
+                <div className="text-4xl text-amber-500 mb-3 flex justify-center">{item.icon}</div>
+                <h3 className="font-bold text-teal-800 text-xl mb-2">{item.title}</h3>
+                <p className="text-gray-600 text-sm">{item.desc}</p>
               </motion.div>
             ))}
           </div>
         </section>
+
+        {/* FINAL MESSAGE */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mt-24 bg-teal-700 text-white py-8 px-6 rounded-2xl shadow-xl text-center"
+        >
+          <h2 className="text-lg md:text-xl font-semibold">
+            “True humanity begins when compassion becomes instinct — not charity.” ❤️
+          </h2>
+        </motion.div>
       </div>
     </div>
   );

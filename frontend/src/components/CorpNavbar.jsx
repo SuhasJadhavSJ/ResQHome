@@ -1,4 +1,3 @@
-// CorpNavbar.jsx
 import React from "react";
 import {
   FaHome,
@@ -22,83 +21,56 @@ const CorpNavbar = () => {
     navigate("/login");
   };
 
-const menu = [
-  { name: "Dashboard", icon: <FaHome />, path: "/corp/dashboard" },
-  { name: "Reported Animals", icon: <FaExclamationTriangle />, path: "/corp/reports" },
-  { name: "Rescued Animals", icon: <FaDog />, path: "/corp/rescued" },
-
-  // FIXED THIS LINE:
-  { name: "List for Adoption", icon: <FaPlusCircle />, path: "/corp/adoption/add" },
-
-  { name: "Adoption Listings", icon: <FaListUl />, path: "/corp/adoptions" },
-  { name: "Adoption Requests", icon: <FaUsers />, path: "/corp/adoption-requests" },
-  { name: "Settings", icon: <FaCog />, path: "/corp/settings" },
-];
-
+  const menu = [
+    { name: "Dashboard", icon: <FaHome />, path: "/corp/dashboard" },
+    { name: "Reported Animals", icon: <FaExclamationTriangle />, path: "/corp/reports" },
+    { name: "Rescued Animals", icon: <FaDog />, path: "/corp/rescued" },
+    { name: "List for Adoption", icon: <FaPlusCircle />, path: "/corp/adoption/add" },
+    { name: "Adoption Listings", icon: <FaListUl />, path: "/corp/adoptions" },
+    { name: "Adoption Requests", icon: <FaUsers />, path: "/corp/adoption-requests" },
+    { name: "Settings", icon: <FaCog />, path: "/corp/settings" },
+  ];
 
   return (
-    <aside
-      className="fixed left-0 top-0 h-full w-20 bg-[#0A3D62] flex flex-col items-center py-6 shadow-xl z-50"
-      aria-label="Corporation sidebar"
-    >
-      {/* Logo / Brand */}
+    <aside className="fixed left-0 top-0 h-full w-24 bg-[#0A3D62] text-white shadow-xl z-50 flex flex-col items-center py-5">
+      
+      {/* Logo */}
       <button
         onClick={() => navigate("/corp/dashboard")}
-        aria-label="Go to dashboard"
-        className="mb-10 text-3xl text-amber-400 cursor-pointer focus:outline-none"
+        className="text-4xl text-amber-400 mb-5 hover:scale-110 transition-transform"
       >
         <FaPaw />
       </button>
 
-      {/* Menu */}
-      <nav className="flex-1 w-full flex flex-col items-center gap-8" role="navigation">
+      {/* Scrollable menu so logout is always visible */}
+      <nav className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col gap-3 px-1">
         {menu.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <div key={item.name} className="relative group flex flex-col items-center w-full">
-              <button
-                onClick={() => navigate(item.path)}
-                aria-label={item.name}
-                className={`flex items-center justify-center mx-auto rounded-lg p-3 text-2xl w-12 h-12 transition-all
-                  ${isActive ? "bg-[#145A86] text-white" : "text-gray-200 hover:text-amber-400"}
-                `}
-                title={item.name}
-              >
-                {item.icon}
-              </button>
-
-              {/* Tooltip displayed below icon on hover */}
-              <span
-                className="absolute top-14 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150
-                  text-xs bg-black text-white px-2 py-1 rounded shadow-lg whitespace-nowrap"
-                aria-hidden="true"
-              >
+            <button
+              key={item.name}
+              onClick={() => navigate(item.path)}
+              className={`flex flex-col items-center gap-1 w-full py-2 rounded-md transition-all
+                ${isActive ? "bg-[#145A86] text-white" : "text-gray-300 hover:text-amber-400"}
+              `}
+            >
+              <span className="text-2xl">{item.icon}</span>
+              <span className="text-[10px] font-medium text-center leading-tight px-1">
                 {item.name}
               </span>
-            </div>
+            </button>
           );
         })}
       </nav>
 
       {/* Logout */}
-      <div className="mt-auto mb-6 w-full flex flex-col items-center">
-        <div className="relative group flex flex-col items-center">
-          <button
-            onClick={handleLogout}
-            aria-label="Logout"
-            className="text-2xl text-red-400 hover:text-red-500 p-3 rounded-lg"
-          >
-            <FaSignOutAlt />
-          </button>
-          <span
-            className="absolute top-14 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150
-              text-xs bg-black text-white px-2 py-1 rounded shadow-lg"
-            aria-hidden="true"
-          >
-            Logout
-          </span>
-        </div>
-      </div>
+      <button
+        onClick={handleLogout}
+        className="mb-2 flex flex-col items-center text-red-400 hover:text-red-500 transition-all"
+      >
+        <FaSignOutAlt className="text-2xl" />
+        <span className="text-[11px] font-medium mt-1">Logout</span>
+      </button>
     </aside>
   );
 };

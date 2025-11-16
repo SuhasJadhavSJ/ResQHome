@@ -2,13 +2,18 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaMapMarkerAlt, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../../components/common/Pagination";
 
 const CorpRescued = () => {
   const [rescued, setRescued] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   const navigate = useNavigate();
 
-  // Fetch rescued animals
   const fetchRescuedAnimals = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -19,13 +24,9 @@ const CorpRescued = () => {
 
       const data = await res.json();
 
-      if (data.success) {
-        setRescued(data.data);
-      } else {
-        console.error("Failed to fetch rescued animals");
-      }
-    } catch (err) {
-      console.error("Error fetching rescued animals:", err);
+      if (data.success) setRescued(data.data);
+    } catch (error) {
+      console.error("Error fetching rescued animals:", error);
     } finally {
       setLoading(false);
     }
@@ -36,53 +37,80 @@ const CorpRescued = () => {
   }, []);
 
   if (loading)
-    return <div className="pt-24 text-center text-gray-600">Loading...</div>;
+    return (
+      <p className="text-center text-gray-600 text-lg pt-10 animate-pulse">
+        Loading rescued animals...
+      </p>
+    );
+
+  // Pagination logic
+  const totalPages = Math.ceil(rescued.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = rescued.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="pt-20 px-6 ml-20">
-      <h1 className="text-4xl font-bold text-teal-900 mb-10">
-        Rescued Animals 🐾
-      </h1>
+    <section className="ml-[90px] min-h-screen bg-gray-50 py-6 pr-6">
+      <div className="max-w-[1700px] w-full">
+        
+        <h1 className="text-3xl font-extrabold text-teal-900 tracking-wide mb-7 pl-4">
+          Rescued Animals 🐾
+        </h1>
 
-      {rescued.length === 0 ? (
-        <p className="text-gray-600">No rescued animals available.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rescued.map((animal, index) => (
-            <motion.div
-              key={animal._id}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white p-4 rounded-xl shadow hover:shadow-xl border border-gray-100"
-            >
-              <img
-                src={animal.imageUrl}
-                alt={animal.name}
-                className="w-full h-56 object-cover rounded-lg"
-              />
+        {rescued.length === 0 ? (
+          <p className="text-gray-600 text-lg pl-4">No rescued animals found.</p>
+        ) : (
+          <>
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 pl-4">
+              {paginatedData.map((animal, index) => (
+                <motion.div
+                  key={animal._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden hover:shadow-2xl transition-all cursor-pointer"
+                >
+                  <div className="relative">
+                    <img
+                      src={animal.imageUrl}
+                      alt={animal.name}
+                      className="w-full h-56 object-cover"
+                    />
+                    <span className="absolute top-3 left-3 px-3 py-1 text-xs rounded-full bg-green-200 text-green-700 font-semibold">
+                      SAFE
+                    </span>
+                  </div>
 
-              <h3 className="text-xl font-semibold text-teal-800 mt-3">
-                {animal.name}
-              </h3>
+                  <div className="p-5 space-y-2">
+                    <h2 className="text-xl font-bold text-teal-800">{animal.name}</h2>
 
-              <p className="text-gray-600 text-sm">{animal.type}</p>
+                    <p className="text-gray-700 text-sm capitalize">{animal.type}</p>
 
-              <p className="text-gray-500 text-sm flex items-center gap-2 mt-1">
-                <FaMapMarkerAlt className="text-amber-500" /> {animal.city}
-              </p>
+                    <p className="flex items-center gap-2 text-gray-600 text-sm">
+                      <FaMapMarkerAlt className="text-amber-500" />
+                      {animal.city || "Unknown"}
+                    </p>
 
-              <button
-                onClick={() => navigate(`/corp/rescued/${animal._id}`)}
-                className="mt-4 w-full bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg flex justify-center gap-2 items-center"
-              >
-                <FaEye /> View Details
-              </button>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </div>
+                    <button
+                      onClick={() => navigate(`/corp/rescued/${animal._id}`)}
+                      className="mt-4 w-full bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg flex justify-center gap-2 items-center text-sm font-medium"
+                    >
+                      <FaEye /> View Details
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
+      </div>
+    </section>
   );
 };
 

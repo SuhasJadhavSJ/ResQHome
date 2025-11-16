@@ -14,93 +14,137 @@ import {
 const tips = [
   {
     title: "Provide Fresh Water",
-    desc: "Animals need clean water at all times. Change the water twice a day and clean the bowl regularly.",
-    icon: <FaTint className="text-teal-600 text-4xl" />,
+    desc: "Animals must have clean drinking water at all times. Replace twice daily & keep bowls hygienic.",
+    icon: <FaTint />,
   },
   {
     title: "Regular Vet Checkups",
-    desc: "A routine veterinary visit every 6–12 months ensures early diagnosis of health issues.",
-    icon: <FaSyringe className="text-teal-600 text-4xl" />,
+    desc: "Preventive health checks every 6–12 months help detect diseases early.",
+    icon: <FaSyringe />,
   },
   {
     title: "Proper Nutrition",
-    desc: "Feed balanced and age-appropriate diets. Avoid harmful foods like chocolate, onions, grapes, etc.",
-    icon: <FaBone className="text-teal-600 text-4xl" />,
+    desc: "Feed balanced food—avoid chocolate, grapes, onions & processed junk.",
+    icon: <FaBone />,
   },
   {
     title: "Bathing & Hygiene",
-    desc: "Maintain cleanliness by bathing pets at recommended intervals and grooming their coat frequently.",
-    icon: <FaShower className="text-teal-600 text-4xl" />,
+    desc: "Scheduled grooming prevents ticks, shedding, skin infections & discomfort.",
+    icon: <FaShower />,
   },
   {
     title: "Exercise & Play",
-    desc: "Animals need physical and mental stimulation. Playtime reduces stress and aggression.",
-    icon: <FaPaw className="text-teal-600 text-4xl" />,
+    desc: "Play improves physical health, confidence & reduces stress or aggression.",
+    icon: <FaPaw />,
   },
   {
     title: "Love & Socialization",
-    desc: "Pets thrive on care, affection, and social interaction. Spend quality time with them daily.",
-    icon: <FaHeartbeat className="text-teal-600 text-4xl" />,
+    desc: "Emotional care is as essential as food & shelter — affection builds trust.",
+    icon: <FaHeartbeat />,
   },
   {
     title: "Safe Environment",
-    desc: "Ensure living areas are free from sharp objects, toxic plants, and unsafe chemicals.",
-    icon: <FaCat className="text-teal-600 text-4xl" />,
+    desc: "Keep away toxins, sharp objects, plastics, polythene & open balconies.",
+    icon: <FaCat />,
   },
   {
     title: "Vaccinations",
-    desc: "Keep pets vaccinated on schedule to protect them from life-threatening diseases.",
-    icon: <FaSyringe className="text-teal-600 text-4xl" />,
+    desc: "Timely vaccine schedule protects from rabies, parvo, distemper & more.",
+    icon: <FaSyringe />,
   },
   {
     title: "Adopt, Don’t Shop",
-    desc: "Encourage people to adopt animals from shelters instead of buying from breeders.",
-    icon: <FaDog className="text-teal-600 text-4xl" />,
+    desc: "Shelter adoption saves lives. Encourage adopt-don’t-shop mindset.",
+    icon: <FaDog />,
   },
 ];
 
 const Tips = () => {
   return (
-    <div className="pt-24 pb-16 bg-gradient-to-b from-teal-50 to-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="pt-24 pb-20 bg-[#f9fafb] min-h-screen relative overflow-hidden">
+
+      {/* Floating Paw Background */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.12 }}
+        transition={{ duration: 1 }}
+        className="absolute inset-0 bg-[url('https://i.ibb.co/N7crGJL/paw-bg.png')] bg-repeat opacity-10 pointer-events-none"
+      />
+
+      <div className="relative max-w-7xl mx-auto px-6">
+
+        {/* Heading */}
         <motion.h1
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -25 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-4xl font-extrabold text-center text-teal-800 mb-10"
+          transition={{ duration: 0.7 }}
+          className="text-center text-5xl font-extrabold text-teal-800 drop-shadow-sm"
         >
-          Animal Care Tips 🐾
+          Animal Care Guide 🐾
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-center text-gray-700 max-w-3xl mx-auto mb-12"
+          className="mt-3 text-center text-gray-700 text-lg max-w-3xl mx-auto"
         >
-          Keep animals safe, healthy, and happy with these essential care
-          recommendations. Small steps make a big difference!
+          Compassion isn’t occasional help — it’s a habit. Start somewhere.
         </motion.p>
 
-        {/* Tips Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tips.map((tip, index) => (
+        {/* Tips Cards */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-14">
+          {tips.map((t, idx) => (
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="p-6 bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer border border-gray-100"
+              key={idx}
+              initial={{ opacity: 0, y: 35 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: idx * 0.06 }}
+              whileHover={{ rotateX: 6, rotateY: -6, scale: 1.04 }}
+              className="p-7 bg-white/70 backdrop-blur-lg rounded-xl shadow-xl border border-gray-100 text-center cursor-pointer transition-all"
+              style={{ transformStyle: "preserve-3d" }}
             >
-              <div className="flex justify-center mb-4">{tip.icon}</div>
-              <h3 className="text-xl font-semibold text-teal-800 text-center mb-2">
-                {tip.title}
+              {/* Icon */}
+              <div className="text-4xl text-amber-500 mb-4 animate-bounce-slow">
+                {t.icon}
+              </div>
+
+              {/* Title */}
+              <h3 className="text-xl font-bold text-teal-800 mb-2">
+                {t.title}
               </h3>
-              <p className="text-gray-600 text-center">{tip.desc}</p>
+
+              {/* Description */}
+              <p className="text-gray-600 text-sm">{t.desc}</p>
             </motion.div>
           ))}
         </div>
+
+        {/* Quote Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mt-14 bg-teal-700 text-white py-6 text-center rounded-2xl shadow-lg px-6"
+        >
+          <h2 className="text-lg md:text-xl font-bold">
+            ⭐ “Until one has loved an animal, a part of one’s soul remains unawakened.”  
+          </h2>
+        </motion.div>
       </div>
+
+      {/* Animations */}
+      <style>
+        {`
+          .animate-bounce-slow {
+            animation: bounceSlow 2s infinite;
+          }
+          @keyframes bounceSlow {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+          }
+        `}
+      </style>
     </div>
   );
 };

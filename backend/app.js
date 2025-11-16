@@ -17,6 +17,7 @@ import corpReports from "./Routes/CorpRoutes/corp.reports.route.js"
 import corpRescuedRoute from './Routes/CorpRoutes/corp.rescued.route.js'
 import corpAdoptionsRoute from "./Routes/CorpRoutes/corp.adoptions.route.js";
 import corpAdoptionRequestRoutes from "./Routes/CorpRoutes/corp.adoptionRequest.route.js";
+import corpProfileRoutes from "./Routes/CorpRoutes/corpProfile.route.js";
 
 dotenv.config();
 
@@ -61,7 +62,7 @@ app.use("/api/corp",corpReports);
 app.use("/api/corp", corpRescuedRoute);
 app.use("/api/corp", corpAdoptionsRoute);
 app.use("/api/corp/adoption-requests", corpAdoptionRequestRoutes);
-
+app.use("/api/corp", corpProfileRoutes);
 
 
 

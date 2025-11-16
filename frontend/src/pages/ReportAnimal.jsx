@@ -1,19 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GoogleMap, Marker, Autocomplete } from "@react-google-maps/api";
 import { useGoogleMaps } from "../Hooks/useGoogleMaps";
-import {
-  FaMapMarkerAlt,
-  FaLocationArrow,
-  FaTimes,
-} from "react-icons/fa";
+import { FaMapMarkerAlt, FaLocationArrow, FaTimes, FaUpload } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
 
 const containerStyle = {
   width: "100%",
   height: "400px",
-  borderRadius: "12px",
-  overflow: "hidden",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+  borderRadius: "18px",
 };
 
 // ===================== Map Component =====================
@@ -74,20 +69,19 @@ const ReportAnimal = () => {
   const [showMap, setShowMap] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Handle Input
+  // ---------------- Input Handler ----------------
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     if (name === "photo" && files[0]) {
       setFormData({ ...formData, photo: files[0] });
       setPhotoPreview(URL.createObjectURL(files[0]));
-      toast.info("Preview updated!");
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  // Autocomplete Select
+  // ---------------- Autocomplete ----------------
   const handlePlaceSelect = () => {
     const place = autocompleteRef.current.getPlace();
     if (place?.geometry) {
@@ -98,37 +92,27 @@ const ReportAnimal = () => {
       setPosition(coords);
       setAddress(place.formatted_address || place.name);
       setShowMap(true);
-      toast.success("Location selected!");
+      toast.success("Location selected");
     }
   };
 
-  // Current Location
+  // ---------------- Current Location ----------------
   const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation not supported!");
-      return;
-    }
+    if (!navigator.geolocation) return toast.error("Geolocation not supported");
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const coords = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        };
-
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setPosition(coords);
-        toast.info("Location detected!");
+        toast.success("Location detected!");
+        setShowMap(true);
 
         if (window.google) {
           const geocoder = new window.google.maps.Geocoder();
           geocoder.geocode({ location: coords }, (results, status) => {
-            if (status === "OK" && results[0]) {
-              setAddress(results[0].formatted_address);
-            }
+            if (status === "OK" && results[0]) setAddress(results[0].formatted_address);
           });
         }
-
-        setShowMap(true);
       },
       () => toast.error("Unable to fetch your location")
     );
@@ -138,30 +122,19 @@ const ReportAnimal = () => {
     if (isLoaded) useCurrentLocation();
   }, [isLoaded]);
 
-  // Submit Report
+  // ---------------- Submit ----------------
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.type || !formData.city || !formData.description) {
-      toast.error("Please fill all required fields!");
-      return;
-    }
+    if (!formData.type || !formData.city || !formData.description)
+      return toast.error("All fields required");
 
-    if (!position) {
-      toast.error("Select or detect the location!");
-      return;
-    }
+    if (!position) return toast.error("Please select location!");
 
-    if (!formData.photo) {
-      toast.error("Please upload an image!");
-      return;
-    }
+    if (!formData.photo) return toast.error("Upload an animal picture!");
 
     const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Login required!");
-      return;
-    }
+    if (!token) return toast.error("Please login first");
 
     setLoading(true);
 
@@ -181,79 +154,52 @@ const ReportAnimal = () => {
       });
 
       const data = await res.json();
-
       if (data.success) {
         toast.success("Report submitted successfully!");
-
         setFormData({ type: "", description: "", city: "", photo: null });
         setPhotoPreview(null);
         setAddress("");
         setPosition(null);
         setShowMap(false);
-      } else {
-        toast.error(data.message || "Error submitting report");
-      }
+      } else toast.error(data.message || "Submission failed");
     } catch (err) {
-      toast.error("Something went wrong!");
-      console.error(err);
-    } finally {
-      setLoading(false);
+      toast.error("Server error");
     }
+
+    setLoading(false);
   };
 
-  if (!isLoaded) return <p>Loading map...</p>;
+  if (!isLoaded) return <p className="text-center mt-20">Loading map...</p>;
 
   return (
-    <div className="pt-20 p-6 max-w-4xl mx-auto">
-      <h2 className="text-4xl font-bold text-teal-800 mb-8 text-center">
-        Report an Animal in Need 🐶
-      </h2>
-
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 bg-white p-8 rounded-2xl shadow-xl border border-gray-100"
+    <div className="pt-24 px-4 pb-14 bg-gradient-to-b from-white to-teal-50 min-h-screen">
+      
+      <motion.h2
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-4xl font-extrabold text-center text-teal-800 mb-8 drop-shadow-sm"
       >
-        {/* Inputs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="type"
-            placeholder="Animal Type (Dog, Cat, etc.)"
-            value={formData.type}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-md focus:ring-2 focus:ring-teal-400"
-            required
-          />
-          <input
-            type="text"
-            name="city"
-            placeholder="City"
-            value={formData.city}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-md focus:ring-2 focus:ring-teal-400"
-            required
-          />
-        </div>
+        Report Animal in Distress 🐾
+      </motion.h2>
 
-        <textarea
-          name="description"
-          placeholder="Describe the animal’s condition..."
-          value={formData.description}
-          onChange={handleChange}
-          className="w-full border p-3 rounded-md focus:ring-2 focus:ring-teal-400"
-          required
-        />
+      <motion.form
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        onSubmit={handleSubmit}
+        className="max-w-3xl mx-auto space-y-6 bg-white rounded-2xl shadow-2xl border p-8 backdrop-blur"
+      >
 
         {/* Photo Upload */}
-        <div className="relative">
-          <input type="file" name="photo" accept="image/*" onChange={handleChange} />
-          {photoPreview && (
-            <div className="mt-3 relative w-40">
-              <img
-                src={photoPreview}
-                alt="Preview"
-                className="rounded-lg shadow-md w-full h-32 object-cover"
-              />
+        <div className="flex flex-col items-center">
+          {!photoPreview ? (
+            <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 border-2 border-dashed border-teal-400 rounded-xl w-full h-44 flex items-center justify-center flex-col gap-2 transition">
+              <FaUpload className="text-3xl text-teal-700" />
+              <p className="text-gray-700 font-medium">Upload Animal Picture</p>
+              <input type="file" name="photo" accept="image/*" onChange={handleChange} hidden />
+            </label>
+          ) : (
+            <div className="relative w-full max-w-xs">
+              <img src={photoPreview} alt="Preview" className="rounded-xl w-full h-44 object-cover shadow-lg" />
               <button
                 type="button"
                 onClick={() => {
@@ -261,67 +207,112 @@ const ReportAnimal = () => {
                   setFormData({ ...formData, photo: null });
                   toast.info("Image removed");
                 }}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 shadow"
               >
-                <FaTimes size={14} />
+                <FaTimes />
               </button>
             </div>
           )}
         </div>
 
-        {/* Search Bar */}
-        <Autocomplete
-          onLoad={(auto) => (autocompleteRef.current = auto)}
-          onPlaceChanged={handlePlaceSelect}
-        >
+        {/* Inputs */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
-            type="text"
-            placeholder="Search or type address"
+            name="type"
+            placeholder="Animal type (Dog, Cat, etc.)"
+            value={formData.type}
+            onChange={handleChange}
+            className="input-style"
+          />
+          <input
+            name="city"
+            placeholder="City"
+            value={formData.city}
+            onChange={handleChange}
+            className="input-style"
+          />
+        </div>
+
+        <textarea
+          name="description"
+          placeholder="Describe the animal condition..."
+          value={formData.description}
+          onChange={handleChange}
+          className="input-style h-28"
+        />
+
+        {/* Autocomplete */}
+        <Autocomplete onLoad={(auto) => (autocompleteRef.current = auto)} onPlaceChanged={handlePlaceSelect}>
+          <input
+            placeholder="Search address or location"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full border p-3 rounded-md focus:ring-2 focus:ring-teal-400"
+            className="input-style"
           />
         </Autocomplete>
 
         {/* Buttons */}
-        <div className="flex flex-wrap gap-4 mt-4 justify-center">
+        <div className="flex flex-wrap gap-4 justify-center">
           <button
             type="button"
             onClick={useCurrentLocation}
-            className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold bg-green-500 hover:bg-green-600 text-white"
+            className="map-btn bg-green-600 hover:bg-green-700"
           >
-            <FaLocationArrow /> Use Current Location
+            <FaLocationArrow /> Detect Location
           </button>
 
           <button
             type="button"
             onClick={() => setShowMap(!showMap)}
-            className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold bg-teal-600 hover:bg-teal-700 text-white"
+            className="map-btn bg-teal-600 hover:bg-teal-700"
           >
-            <FaMapMarkerAlt /> {showMap ? "Hide Map" : "Select from Map"}
+            <FaMapMarkerAlt /> {showMap ? "Hide Map" : "Select on Map"}
           </button>
         </div>
 
         {/* Map */}
-        {showMap && (
-          <div className="mt-6">
-            <ReportAnimalMap
-              position={position}
-              setPosition={setPosition}
-              onAddressUpdate={setAddress}
-            />
-          </div>
-        )}
+        <AnimatePresence>
+          {showMap && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
+              <ReportAnimalMap position={position} setPosition={setPosition} onAddressUpdate={setAddress} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Submit */}
         <button
           type="submit"
           disabled={loading}
-          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold mt-6 w-full md:w-auto"
+          className="w-full py-3 rounded-lg text-white font-bold bg-amber-500 hover:bg-amber-600 transition text-lg shadow"
         >
           {loading ? "Submitting..." : "Submit Report"}
         </button>
-      </form>
+      </motion.form>
+
+      {/* Reusable Styles */}
+      <style>{`
+        .input-style {
+          border: 1px solid #d1d5db;
+          padding: 12px;
+          border-radius: 10px;
+          outline: none;
+          transition: 0.3s;
+          width: 100%;
+        }
+        .input-style:focus {
+          border-color: #0d9488;
+          box-shadow: 0 0 0 2px rgba(13,148,136,0.25);
+        }
+        .map-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          border-radius: 10px;
+          color: white;
+          font-weight: 600;
+        }
+      `}</style>
     </div>
   );
 };
