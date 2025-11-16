@@ -1,29 +1,14 @@
 import mongoose from "mongoose";
 
-const adoptionSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
-      required: true,
-    },
-    animal: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "animal", // we’ll create this model later
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: ["adopted", "pending"],
-      default: "adopted",
-    },
-    adoptedDate: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  { timestamps: true }
-);
+const adoptionSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  animal: { type: mongoose.Schema.Types.ObjectId, ref: "AdoptionAnimal", required: true },
+  status: {
+  type: String,
+  enum: ["pending", "in_process", "rejected", "adopted"],
+  default: "pending",
+},
+  createdAt: { type: Date, default: Date.now }
+});
 
-const Adoption = mongoose.model("Adoption", adoptionSchema);
-export default Adoption;
+export default mongoose.model("Adoption", adoptionSchema);

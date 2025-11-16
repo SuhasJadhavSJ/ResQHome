@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { FaMapMarkerAlt, FaPaw, FaTrashAlt, FaEye } from "react-icons/fa";
+import { FaMapMarkerAlt, FaTrashAlt, FaEye } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [reports, setReports] = useState([]);
-  const [adoptions, setAdoptions] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [adoptedAnimals, setAdoptedAnimals] = useState([]);
+  const [rejectedRequests, setRejectedRequests] = useState([]);
   const [activeTab, setActiveTab] = useState("reports");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // ✅ Fetch user, reports, adoptions
   useEffect(() => {
-    const fetchProfileData = async () => {
+    const loadProfile = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return navigate("/login");
 
-        const [profileRes, reportRes, adoptionRes] = await Promise.all([
+        const [uRes, rRes, aRes] = await Promise.all([
           fetch("http://localhost:8000/api/user/profile", {
             headers: { Authorization: `Bearer ${token}` },
           }),
@@ -30,62 +31,48 @@ const Profile = () => {
           }),
         ]);
 
-        const [profileData, reportsData, adoptionsData] = await Promise.all([
-          profileRes.json(),
-          reportRes.json(),
-          adoptionRes.json(),
-        ]);
+        const userData = await uRes.json();
+        const reportsData = await rRes.json();
+        const adoptionData = await aRes.json();
 
-        setUser(profileData.user);
+        setUser(userData.user);
         setReports(reportsData.data || []);
-        setAdoptions(adoptionsData.data || []);
-      } catch (error) {
-        console.error("❌ Error fetching profile:", error);
+
+        // Separate adoption requests
+        const pending = adoptionData.data.pending || [];
+        const approved = adoptionData.data.approved || [];
+        const rejected = adoptionData.data.rejected || [];
+
+        setPendingRequests(pending);
+        setAdoptedAnimals(approved);
+        setRejectedRequests(rejected);
+
+      } catch (err) {
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchProfileData();
+    loadProfile();
   }, [navigate]);
 
-  // ✅ Delete report
   const handleDeleteReport = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this report?")) return;
+    if (!window.confirm("Delete report permanently?")) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(
-        `http://localhost:8000/api/user/delete-report/${id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const data = await res.json();
-      if (data.success) {
-        alert("Report deleted successfully!");
-        setReports((prev) => prev.filter((r) => r._id !== id));
-      } else alert(data.message || "Failed to delete report");
+      await fetch(`http://localhost:8000/api/user/delete-report/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setReports((prev) => prev.filter((r) => r._id !== id));
     } catch (err) {
-      console.error("Error deleting report:", err);
+      console.error(err);
     }
   };
 
-  if (loading)
-    return (
-      <div className="pt-24 text-center text-gray-600 text-lg animate-pulse">
-        Loading profile...
-      </div>
-    );
+  if (loading) return <p className="pt-24 text-center">Loading...</p>;
 
-  if (!user)
-    return (
-      <div className="pt-24 text-center text-gray-600 text-lg">
-        No user data found.
-      </div>
-    );
-
-  // ✅ Safe image URL handling
-  const profilePic = user.profilePic
+  const profilePic = user?.profilePic
     ? user.profilePic.startsWith("http")
       ? user.profilePic
       : `http://localhost:8000/${user.profilePic.replace(/\\/g, "/")}`
@@ -93,177 +80,79 @@ const Profile = () => {
 
   return (
     <div className="pt-20 min-h-screen bg-gray-50 flex flex-col items-center">
-      {/* ===== Profile Header ===== */}
-      <div className="w-full max-w-4xl bg-white rounded-xl shadow-md border border-gray-200 mt-10">
-        <div className="flex flex-col md:flex-row items-center md:items-start p-8 gap-6">
-          <img
-            src={profilePic}
-            alt="Profile"
-            className="w-32 h-32 rounded-full border-4 border-amber-400 object-cover shadow-md"
-          />
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4 justify-center md:justify-start">
-              <h2 className="text-2xl font-semibold text-teal-800">
-                {user.name}
-              </h2>
-              <button
-                onClick={() => navigate("/edit-profile")}
-                className="border border-gray-300 text-gray-800 font-semibold px-4 py-1 rounded-md hover:bg-gray-100 transition cursor-pointer"
-              >
-                Edit Profile
-              </button>
-            </div>
-            <p className="text-gray-600">{user.email}</p>
-            <p className="flex items-center justify-center md:justify-start gap-2 text-gray-600">
-              <FaMapMarkerAlt className="text-amber-500" />
-              {user.city || "Not specified"}
+
+      {/* HEADER */}
+      <div className="max-w-4xl bg-white border shadow rounded-xl mt-10 w-full">
+        <div className="p-6 flex items-center gap-6">
+          <img src={profilePic} className="w-28 h-28 rounded-full border-4 border-amber-400 object-cover" />
+          <div>
+            <h1 className="text-2xl font-bold text-teal-800">{user?.name}</h1>
+            <p className="text-gray-600">{user?.email}</p>
+            <p className="flex items-center gap-1 text-gray-600">
+              <FaMapMarkerAlt className="text-amber-500" /> {user?.city || "N/A"}
             </p>
           </div>
         </div>
       </div>
 
-      {/* ===== Tabs ===== */}
-      <div className="mt-8 w-full max-w-4xl flex justify-center gap-8 border-t border-gray-300">
-        <button
-          onClick={() => setActiveTab("reports")}
-          className={`cursor-pointer py-3 px-6 font-semibold text-sm tracking-wide border-b-2 transition ${
-            activeTab === "reports"
-              ? "border-teal-600 text-teal-700"
-              : "border-transparent text-gray-500 hover:text-gray-800"
-          }`}
-        >
-          Reported Animals
-        </button>
-        <button
-          onClick={() => setActiveTab("adoptions")}
-          className={`cursor-pointer py-3 px-6 font-semibold text-sm tracking-wide border-b-2 transition ${
-            activeTab === "adoptions"
-              ? "border-teal-600 text-teal-700"
-              : "border-transparent text-gray-500 hover:text-gray-800"
-          }`}
-        >
-          Adopted Pets
-        </button>
+      {/* TABS */}
+      <div className="mt-6 flex gap-8 border-b">
+        {["reports", "requests", "adopted"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`py-2 px-5 font-semibold text-sm border-b-2 ${
+              activeTab === tab ? "text-teal-700 border-teal-600" : "text-gray-500 border-transparent"
+            }`}
+          >
+            {tab === "reports" ? "Reported Animals" : tab === "requests" ? "Adoption Requests" : "Adopted Animals"}
+          </button>
+        ))}
       </div>
 
-      {/* ===== Tab Content ===== */}
       <div className="max-w-5xl mx-auto px-6 mt-8 w-full">
         <AnimatePresence mode="wait">
-          {activeTab === "reports" ? (
-            <motion.div
-              key="reports"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
-            >
-              {reports.length === 0 ? (
-                <p className="text-center text-gray-600 col-span-full">
-                  No reports found.
-                </p>
-              ) : (
+
+          {/*  REPORTS  */}
+          {activeTab === "reports" && (
+            <motion.div key="rep" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {reports.length === 0 ? <p className="text-center col-span-full text-gray-500">No reports.</p> :
                 reports.map((report) => (
-                  <div
+                  <ProfileCard
                     key={report._id}
-                    className="relative group rounded-xl overflow-hidden bg-white shadow hover:shadow-xl transition duration-300 cursor-pointer"
-                  >
-                    <img
-                      src={
-                        report.imageUrl?.startsWith("http")
-                          ? report.imageUrl
-                          : `http://localhost:8000/${report.imageUrl?.replace(
-                              /\\/g,
-                              "/"
-                            )}`
-                      }
-                      alt={report.type}
-                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center gap-3">
-                      <button
-                        onClick={() => navigate(`/report/${report._id}`)}
-                        className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition"
-                      >
-                        <FaEye /> View
-                      </button>
-                      <button
-                        onClick={() => handleDeleteReport(report._id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition"
-                      >
-                        <FaTrashAlt /> Delete
-                      </button>
-                    </div>
-                    <div className="p-3">
-                      <h3 className="font-semibold text-teal-700">
-                        {report.type}
-                      </h3>
-                      <p className="text-gray-600 text-sm">{report.city}</p>
-                      <p className="text-gray-500 text-xs flex items-center gap-1">
-                        <FaMapMarkerAlt className="text-amber-500" />{" "}
-                        {report.address || "No address"}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="adoptions"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
-            >
-              {adoptions.length === 0 ? (
-                <p className="text-center text-gray-600 col-span-full">
-                  No adopted pets found.
-                </p>
-              ) : (
-                adoptions.map((adopt) => (
-                  <div
-                    key={adopt._id}
-                    className="relative group rounded-xl overflow-hidden bg-white shadow hover:shadow-xl transition duration-300"
-                  >
-                    <img
-                      src={
-                        adopt.animal?.image?.startsWith("http")
-                          ? adopt.animal.image
-                          : `http://localhost:8000/${adopt.animal?.image?.replace(
-                              /\\/g,
-                              "/"
-                            )}`
-                      }
-                      alt={adopt.animal?.name}
-                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
-                      <button
-                        onClick={() => navigate(`/pet/${adopt.animal?._id}`)}
-                        className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-full flex items-center gap-2 transition"
-                      >
-                        <FaEye /> View
-                      </button>
-                    </div>
-                    <div className="p-3">
-                      <h3 className="font-semibold text-teal-700">
-                        {adopt.animal?.name}
-                      </h3>
-                      <p className="text-gray-600 text-sm">
-                        {adopt.animal?.type}
-                      </p>
-                      <p className="text-gray-500 text-xs flex items-center gap-1">
-                        <FaMapMarkerAlt className="text-amber-500" />{" "}
-                        {adopt.animal?.city || "No address"}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
+                    data={report}
+                    image={
+                      report.imageUrl?.startsWith("http")
+                        ? report.imageUrl
+                        : `http://localhost:8000/${report.imageUrl}`
+                    }
+                    onDelete={() => handleDeleteReport(report._id)}
+                    onView={() => navigate(`/report/${report._id}`)}
+                    showDelete={true}
+                  />
+                ))}
             </motion.div>
           )}
+
+          {/*  ADOPTION REQUESTS  */}
+          {activeTab === "requests" && (
+            <motion.div key="req" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="space-y-10">
+
+              <Section label="Pending Requests" color="bg-amber-500" list={pendingRequests} navigate={navigate} />
+              <Section label="Rejected Requests" color="bg-red-600" list={rejectedRequests} navigate={navigate} />
+            </motion.div>
+          )}
+
+          {/*  ADOPTED ANIMALS  */}
+          {activeTab === "adopted" && (
+            <motion.div key="adop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="space-y-8">
+              <Section label="Adopted Successfully" color="bg-green-600" list={adoptedAnimals} navigate={navigate} />
+            </motion.div>
+          )}
+
         </AnimatePresence>
       </div>
     </div>
@@ -271,3 +160,59 @@ const Profile = () => {
 };
 
 export default Profile;
+
+/* ---------- REUSABLE COMPONENTS ---------- */
+
+const ProfileCard = ({ data, image, onDelete, onView, showDelete }) => (
+  <div className="group relative bg-white shadow rounded-xl overflow-hidden">
+    <img src={image} alt="" className="w-full h-60 object-cover group-hover:scale-110 transition" />
+    <div className="p-3">
+      <h3 className="text-teal-800 font-semibold">{data?.name || data?.type || "Unknown"}</h3>
+      <p className="text-gray-500 text-sm">{data?.city}</p>
+    </div>
+    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
+      <button onClick={onView} className="px-4 py-2 rounded bg-amber-500 text-white mx-2 flex items-center gap-2">
+        <FaEye /> View
+      </button>
+
+      {showDelete && (
+        <button onClick={onDelete} className="px-4 py-2 rounded bg-red-600 text-white mx-2 flex items-center gap-2">
+          <FaTrashAlt /> Delete
+        </button>
+      )}
+    </div>
+  </div>
+);
+
+const Section = ({ label, list, color, navigate }) => (
+  <div>
+    <h2 className="text-lg font-semibold mb-2">{label}</h2>
+    {list.length === 0 ? (
+      <p className="text-gray-500 text-sm">No records found.</p>
+    ) : (
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {list.map((item) => {
+          const image = item?.animal?.images?.[0] || "https://via.placeholder.com/300x200?text=No+Image";
+          return (
+            <div key={item._id} className="relative rounded-xl bg-white shadow overflow-hidden">
+              <span className={`absolute top-2 left-2 px-2 py-1 text-white text-xs font-semibold rounded ${color}`}>
+                {item.status.toUpperCase()}
+              </span>
+              <img src={image} alt="" className="w-full h-60 object-cover" />
+              <div className="p-3">
+                <h4 className="font-semibold text-teal-700">{item?.animal?.name}</h4>
+                <p className="text-gray-500 text-xs">{item?.animal?.city}</p>
+                <button
+                  onClick={() => navigate(`/adoption/${item?.animal?._id}`)}
+                  className="mt-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-1 rounded text-xs"
+                >
+                  View
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </div>
+);

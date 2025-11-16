@@ -33,6 +33,8 @@ import CorpCreateListing from "./pages/Corp/CorpCreateListing.jsx";
 import CorpListingDetails from "./pages/Corp/CorpListingDetails.jsx";
 import CorpListings from "./pages/Corp/CorpListings.jsx";
 import AddAnimalForAdoption from "./pages/Corp/AddAnimalForAdoption.jsx";
+import AnimalDetails from "./pages/AnimalDetails.jsx";
+import AdoptionRequests from "./pages/Corp/AdoptionRequests.jsx";
 const App = () => {
   return (
     <>
@@ -56,6 +58,8 @@ const App = () => {
             <Route path="/rescued/:id" element={<RescuedDetails />} />
             <Route path="/tips" element={<Tips />} />
             <Route path="/about" element={<About />} />
+            <Route path="/adoption/:id" element={<AnimalDetails />} />
+
             <Route
               path="/report/:id"
               element={
@@ -76,6 +80,8 @@ const App = () => {
             />
             <Route path="/corp/adoptions" element={<CorpListings/>}/> 
             <Route path="/corp/adoption/:id" element={<CorpListingDetails />} /> 
+            <Route path="/corp/adoption-requests" element={<AdoptionRequests />} />
+
           </Routes>
           
         </div>

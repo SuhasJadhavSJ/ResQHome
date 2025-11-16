@@ -16,6 +16,7 @@ import corpRoute from './Routes/CorpRoutes/corp.route.js'
 import corpReports from "./Routes/CorpRoutes/corp.reports.route.js"
 import corpRescuedRoute from './Routes/CorpRoutes/corp.rescued.route.js'
 import corpAdoptionsRoute from "./Routes/CorpRoutes/corp.adoptions.route.js";
+import corpAdoptionRequestRoutes from "./Routes/CorpRoutes/corp.adoptionRequest.route.js";
 
 dotenv.config();
 
@@ -59,6 +60,10 @@ app.use("/api/corp", corpRoute);
 app.use("/api/corp",corpReports);
 app.use("/api/corp", corpRescuedRoute);
 app.use("/api/corp", corpAdoptionsRoute);
+app.use("/api/corp/adoption-requests", corpAdoptionRequestRoutes);
+
+
+
 
 // Server start
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaPaw, FaHeart, FaMapMarkerAlt } from "react-icons/fa";
@@ -7,42 +7,49 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 const Home = () => {
-  const [rescuedImages, setRescuedImages] = useState([]);
+  // Mixed free safe demo images
+const demoRescuedImages = [
+  // White Dog
+  "https://plus.unsplash.com/premium_photo-1666278379770-440439b08656?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
-  useEffect(() => {
-    const fetchRescued = async () => {
-      try {
-        const res = await fetch("http://localhost:8000/api/user/rescued");
-        const data = await res.json();
+  // Cat
+  "https://images.unsplash.com/photo-1529778873920-4da4926a72c2?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8QW5pbWFsc3xlbnwwfHwwfHx8MA%3D%3D",
 
-        if (data.success) {
-          const imgs = data.data
-            .map((r) => r.imageUrl)
-            .filter((url) => url !== null && url !== undefined);
+  // Hen
+  "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Y2hpY2tlbnN8ZW58MHx8MHx8fDA%3D",
 
-          setRescuedImages(imgs);
-        }
-      } catch (err) {
-        console.error("Failed to load rescued animals:", err);
-      }
-    };
+  // White cat
+  "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y2F0c3xlbnwwfHwwfHx8MA%3D%3D",
 
-    fetchRescued();
-  }, []);
+  // Bird
+  "https://images.pexels.com/photos/750525/pexels-photo-750525.jpeg",
 
-  const fallbackImages = [
-    "https://cdn.pixabay.com/photo/2016/02/19/11/53/dog-1209621_1280.jpg",
-    "https://cdn.pixabay.com/photo/2017/05/09/21/47/dog-2294701_1280.jpg",
-    "https://cdn.pixabay.com/photo/2015/03/26/09/54/cat-690051_1280.jpg",
-  ];
+  // Cow
+  "https://images.unsplash.com/photo-1527153857715-3908f2bae5e8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y293c3xlbnwwfHwwfHx8MA%3D%3D",
 
-  const sliderImages =
-    rescuedImages.length > 0 ? rescuedImages : fallbackImages;
+  // Brown Dog
+  "https://images.pexels.com/photos/257577/pexels-photo-257577.jpeg",
+
+  // Bird
+  "https://images.unsplash.com/photo-1555169062-013468b47731?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGJpcmR8ZW58MHx8MHx8fDA%3D",
+
+  // Horse
+  "https://images.unsplash.com/photo-1598974357801-cbca100e65d3?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aG9yc2V8ZW58MHx8MHx8fDA%3D",
+
+  // Goat
+  "https://images.unsplash.com/photo-1550348579-959785e820f7?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Z29hdHN8ZW58MHx8MHx8fDA%3D",
+
+  // Bird Parrot
+  "https://images.unsplash.com/photo-1452570053594-1b985d6ea890?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGJpcmR8ZW58MHx8MHx8fDA%3D",
+
+  "https://images.unsplash.com/photo-1497752531616-c3afd9760a11?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGFuaW1hbHxlbnwwfHwwfHx8MA%3D%3D",
+];
+
 
   const sliderSettings = {
     dots: true,
     infinite: true,
-    speed: 1000,
+    speed: 900,
     autoplay: true,
     autoplaySpeed: 3000,
     fade: true,
@@ -53,8 +60,8 @@ const Home = () => {
     <div className="pt-20 bg-gray-50 text-gray-800 overflow-hidden">
       {/* Hero Section */}
       <section className="relative max-w-7xl mx-auto px-6 py-16 flex flex-col-reverse md:flex-row items-center justify-between">
-        
-        {/* Left Content */}
+
+        {/* Left Section */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -90,7 +97,7 @@ const Home = () => {
           </motion.div>
         </motion.div>
 
-        {/* Right Image Carousel */}
+        {/* Right Slider Section */}
         <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -99,13 +106,9 @@ const Home = () => {
         >
           <div className="rounded-2xl overflow-hidden shadow-xl">
             <Slider {...sliderSettings}>
-              {sliderImages.map((src, index) => (
-                <div key={index}>
-                  <img
-                    src={src}
-                    alt={`Rescued ${index + 1}`}
-                    className="w-full h-[400px] object-cover"
-                  />
+              {demoRescuedImages.map((src, i) => (
+                <div key={i}>
+                  <img src={src} alt={`rescued-${i}`} className="w-full h-[400px] object-cover" />
                 </div>
               ))}
             </Slider>
@@ -120,39 +123,37 @@ const Home = () => {
             {
               icon: <FaPaw />,
               title: "Adopt Easily",
-              desc: "Browse verified listings from NGOs and municipal shelters.",
+              desc: "Browse verified listings from NGOs and shelters.",
             },
             {
               icon: <FaMapMarkerAlt />,
-              title: "Report with Location",
-              desc: "Report injured or stray animals with live GPS location.",
+              title: "Report Any Animal",
+              desc: "Submit rescue details with real-time GPS location.",
             },
             {
               icon: <FaHeart />,
-              title: "Support the Cause",
-              desc: "Volunteer or contribute to local shelters making a difference.",
+              title: "Volunteer & Support",
+              desc: "Help care and rehabilitate rescued animals.",
             },
-          ].map((f, idx) => (
+          ].map((item, index) => (
             <motion.div
-              key={idx}
+              key={index}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.2 }}
+              transition={{ delay: index * 0.15 }}
               className="p-8 bg-gray-50 rounded-xl shadow-lg hover:shadow-2xl transition hover:-translate-y-2"
             >
               <div className="text-amber-500 text-5xl mb-4 flex justify-center">
-                {f.icon}
+                {item.icon}
               </div>
-              <h3 className="font-bold text-2xl mb-3 text-teal-800">
-                {f.title}
-              </h3>
-              <p className="text-gray-600">{f.desc}</p>
+              <h3 className="font-bold text-2xl mb-3 text-teal-800">{item.title}</h3>
+              <p className="text-gray-600">{item.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Call to Action */}
       <motion.section
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -175,9 +176,7 @@ const Home = () => {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-6 text-center text-sm">
-        © {new Date().getFullYear()}{" "}
-        <span className="text-amber-500">ResQHome</span> — Built with ❤️ to
-        save lives.
+        © {new Date().getFullYear()} <span className="text-amber-500">ResQHome</span> — Built with ❤️
       </footer>
     </div>
   );
